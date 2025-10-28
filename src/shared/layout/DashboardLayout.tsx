@@ -1,8 +1,16 @@
 import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Home, Users, Upload } from 'lucide-react';
+import { LogOut, Menu, X, Home, Users, Upload, ChevronDown, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/core/store/authStore';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -48,12 +56,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </Link>
             </div>
 
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">{user?.email}</span>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Salir
-              </Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="px-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(user?.id || user?.email || '')}`}>
+                        {getInitials(user?.firstName || user?.email || '')}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">{getFirstName(user)}</span>
+                        <ChevronDown className="h-4 w-4 text-gray-500" />
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4" />
+                    Perfil (próximamente)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2 text-red-600" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4" />
+                    Cerrar sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -91,5 +122,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
     </div>
   );
+}
+function getFirstName(user: any): string {
+  if (!user) return '';
+  if (user.firstName) return user.firstName.trim().split(' ')[0];
+  if (user.email) return String(user.email).split('@')[0];
+  return '';
+}
+
+function getInitials(value: string): string {
+  if (!value) return '';
+  const first = value.trim()[0]?.toUpperCase() || '';
+  return first;
+}
+
+function getAvatarColor(seed: string): string {
+  const colors = [
+    'bg-[#AA0F16]',
+    'bg-rose-600',
+    'bg-amber-600',
+    'bg-emerald-600',
+    'bg-sky-600',
+    'bg-indigo-600',
+    'bg-fuchsia-600',
+  ];
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
 }
 

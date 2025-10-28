@@ -26,7 +26,7 @@ export default function UploadFile() {
   return (
     <div className="w-full h-full flex flex-col gap-8">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Subir Archivo CSV</h1>
+        <h1 className="text-3xl font-bold">Subir Archivo CSV</h1>
         <p className="text-muted-foreground">Carga archivos CSV y visualiza una previsualización de sus datos.</p>
       </div>
 

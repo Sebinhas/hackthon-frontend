@@ -23,11 +23,24 @@ export interface CsvPreviewData {
 
 export interface CsvUploadPayload {
   file: File;
+  fincaId: number;
 }
 
 export interface CsvValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
+}
+
+export interface Finca {
+  key: string;
+  grupo: string;
+  sigla: string;
+  moneda: string;
+  nombre: string;
+  pagoDia: number;
+  keyValue: number;
+  tipoSujetoId: number;
+  tipoCultivoId: number;
 }
 

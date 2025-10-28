@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { uploadFileService } from '../services/uploadFile.service';
-import { CsvFile } from '../types/uploadFile.types';
+import { CsvFile, Finca } from '../types/uploadFile.types';
 import { FileCell, StatusCell, RowCountCell, ActionsCell } from '../components/UploadFileCellTemplates';
 
 // Hooks React Query Base
@@ -25,7 +25,8 @@ export const useSubirArchivoCsv = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => uploadFileService.subirArchivoCsv(file),
+    mutationFn: ({ file, fincaId }: { file: File; fincaId: number }) =>
+      uploadFileService.subirArchivoCsv(file, fincaId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['archivos-csv'] });
       toast.success('Archivo subido exitosamente');
@@ -59,12 +60,20 @@ export const useObtenerPreviewArchivo = (id: string) => {
   });
 };
 
+export const useObtenerFincas = () => {
+  return useQuery({
+    queryKey: ['fincas'],
+    queryFn: () => uploadFileService.obtenerFincas(),
+  });
+};
+
 // Hook de Página Principal (Lista)
 export const useUploadFilePage = () => {
   const { data: archivos = [], isLoading } = useObtenerArchivosCsv();
   const eliminarArchivo = useEliminarArchivoCsv();
   const [archivoAEliminar, setArchivoAEliminar] = useState<string | null>(null);
   const [archivoAVer, setArchivoAVer] = useState<string | null>(null);
+  const [selectedFincaId, setSelectedFincaId] = useState<number | null>(null);
 
   const handleDeleteConfirm = () => {
     if (archivoAEliminar) {
@@ -121,6 +130,8 @@ export const useUploadFilePage = () => {
     archivoAVer,
     handleViewFile,
     handleClosePreview,
+    selectedFincaId,
+    setSelectedFincaId,
   };
 };
 
