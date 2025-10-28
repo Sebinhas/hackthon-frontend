@@ -1,5 +1,4 @@
 import { api } from '@/core/api/useConfigApi';
-import { mockService } from '@/shared/mocks/mockService';
 import { LoginCredentials, RegisterCredentials, AuthResponse } from '@/core/types/auth.types';
 
 // Cambiar a true para usar datos mockeados
@@ -7,9 +6,7 @@ const USE_MOCK = false;
 
 export const authServices = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    if (USE_MOCK) {
-      return mockService.login(credentials);
-    }
+
 
     try {
       const response = await api.post<AuthResponse>('/api/v1/auth/login', credentials);
@@ -23,9 +20,7 @@ export const authServices = {
   },
 
   register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
-    if (USE_MOCK) {
-      return mockService.register(credentials);
-    }
+
 
     try {
       const response = await api.post<AuthResponse>('/api/v1/auth/register', credentials);
