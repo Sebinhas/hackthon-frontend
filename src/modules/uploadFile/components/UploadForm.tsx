@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { Upload, FileSpreadsheet, Download } from 'lucide-react';
+import { CheckCircle2, FileSpreadsheet, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSubirArchivoCsv, useObtenerFincas } from '../hooks/useUploadFile';
+import { useObtenerFincas } from '../hooks/useUploadFile';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
-export const UploadForm = () => {
+interface UploadFormProps {
+  onPreviewReady: (data: { headers: string[]; rows: Record<string, any>[]; totalRows: number }) => void;
+}
+
+export const UploadForm = ({ onPreviewReady }: UploadFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFincaId, setSelectedFincaId] = useState<number | null>(null);
-  const subirArchivo = useSubirArchivoCsv();
+  const [isValidating, setIsValidating] = useState(false);
   const { data: fincas = [], isLoading: isLoadingFincas } = useObtenerFincas();
 
   const handleDownloadTemplate = () => {
@@ -51,16 +55,41 @@ export const UploadForm = () => {
       return;
     }
 
-    if (selectedFile && selectedFincaId !== null) {
-      subirArchivo.mutate({ file: selectedFile, fincaId: selectedFincaId }, {
-        onSuccess: () => {
-          setSelectedFile(null);
-          if (document.querySelector('input[type="file"]')) {
-            (document.querySelector('input[type="file"]') as HTMLInputElement).value = '';
-          }
-        },
-      });
-    }
+    // Validación local y previsualización
+    setIsValidating(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = String(reader.result || '');
+        const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(Boolean);
+        if (lines.length === 0) {
+          toast.error('El archivo CSV está vacío.');
+          setIsValidating(false);
+          return;
+        }
+        const headers = lines[0].split(',').map((h) => h.trim());
+        const rows = lines.slice(1).map((line) => {
+          const values = line.split(',');
+          const row: Record<string, any> = {};
+          headers.forEach((h, i) => {
+            row[h] = (values[i] ?? '').trim();
+          });
+          return row;
+        });
+
+        onPreviewReady({ headers, rows, totalRows: rows.length });
+        toast.success('Archivo validado correctamente');
+      } catch (e: any) {
+        toast.error('No se pudo leer el archivo CSV');
+      } finally {
+        setIsValidating(false);
+      }
+    };
+    reader.onerror = () => {
+      toast.error('Error leyendo el archivo');
+      setIsValidating(false);
+    };
+    reader.readAsText(selectedFile);
   };
 
   return (
@@ -127,10 +156,10 @@ export const UploadForm = () => {
         <Button
           type="submit"
           className="w-full bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
-          disabled={subirArchivo.isPending}
+          disabled={isValidating}
         >
-          <Upload className="mr-2 h-4 w-4" />
-          {subirArchivo.isPending ? 'Subiendo...' : 'Subir Archivo'}
+          <CheckCircle2 className="mr-2 h-4 w-4" />
+          {isValidating ? 'Validando...' : 'Validar archivo'}
         </Button>
       )}
     </form>
