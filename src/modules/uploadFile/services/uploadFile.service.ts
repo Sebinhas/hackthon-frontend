@@ -1,19 +1,22 @@
 import { api } from '@/core/api/useConfigApi';
 import { mockService } from '@/shared/mocks/mockService';
-import { CsvFile, CsvUploadResponse, CsvPreviewData } from '../types/uploadFile.types';
+import { CsvFile, CsvUploadResponse, CsvPreviewData, Finca } from '../types/uploadFile.types';
 
 // Cambiar a true para usar datos mockeados
 const USE_MOCK = true;
 
 export const uploadFileService = {
-  subirArchivoCsv: async (file: File): Promise<CsvUploadResponse> => {
+  subirArchivoCsv: async (file: File, fincaId?: number): Promise<CsvUploadResponse> => {
     if (USE_MOCK) {
-      return mockService.subirArchivoCsv(file);
+      return mockService.subirArchivoCsv(file, fincaId);
     }
 
     try {
       const formData = new FormData();
       formData.append('file', file);
+      if (typeof fincaId === 'number') {
+        formData.append('fincaId', String(fincaId));
+      }
 
       const response = await api.post<CsvUploadResponse>('/files/upload', formData, {
         headers: {
@@ -74,6 +77,19 @@ export const uploadFileService = {
       await api.delete(`/files/${id}`);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error al eliminar archivo');
+    }
+  },
+
+  obtenerFincas: async (): Promise<Finca[]> => {
+    if (USE_MOCK) {
+      return mockService.obtenerFincas();
+    }
+
+    try {
+      const response = await api.get<Finca[]>('/fincas');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Error al obtener fincas');
     }
   },
 };

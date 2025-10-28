@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Upload, FileSpreadsheet, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSubirArchivoCsv } from '../hooks/useUploadFile';
+import { useSubirArchivoCsv, useObtenerFincas } from '../hooks/useUploadFile';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export const UploadForm = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFincaId, setSelectedFincaId] = useState<number | null>(null);
   const subirArchivo = useSubirArchivoCsv();
+  const { data: fincas = [], isLoading: isLoadingFincas } = useObtenerFincas();
 
   const handleDownloadTemplate = () => {
     const headers = ['Lote', 'Linea', 'Palma', 'Logitud', 'Latitud'];
@@ -37,8 +41,18 @@ export const UploadForm = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (selectedFile) {
-      subirArchivo.mutate(selectedFile, {
+    if (selectedFincaId === null) {
+      toast.error('Selecciona una finca antes de subir el archivo.');
+      return;
+    }
+
+    if (!selectedFile) {
+      toast.error('Selecciona un archivo CSV para continuar.');
+      return;
+    }
+
+    if (selectedFile && selectedFincaId !== null) {
+      subirArchivo.mutate({ file: selectedFile, fincaId: selectedFincaId }, {
         onSuccess: () => {
           setSelectedFile(null);
           if (document.querySelector('input[type="file"]')) {
@@ -57,7 +71,26 @@ export const UploadForm = () => {
           Descargar plantilla CSV
         </Button>
       </div>
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#AA0F16] transition-colors">
+      <div className="grid gap-4">
+        <div className="flex items-end gap-4">
+          <div className="w-full">
+            <label className="block text-sm font-medium mb-1">Finca</label>
+            <Select onValueChange={(v) => setSelectedFincaId(Number(v))}>
+              <SelectTrigger>
+                <SelectValue placeholder={isLoadingFincas ? 'Cargando fincas...' : 'Selecciona una finca'} />
+              </SelectTrigger>
+              <SelectContent>
+                {fincas.map((finca) => (
+                  <SelectItem key={finca.keyValue} value={String(finca.keyValue)}>
+                    {finca.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#AA0F16] transition-colors">
         <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400 mb-4" />
         
         <label htmlFor="file-upload" className="cursor-pointer">
@@ -87,6 +120,7 @@ export const UploadForm = () => {
             </div>
           )}
         </label>
+        </div>
       </div>
 
       {selectedFile && (

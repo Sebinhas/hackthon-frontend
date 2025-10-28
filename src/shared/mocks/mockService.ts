@@ -1,7 +1,7 @@
 import { Usuario, UsuarioPayload } from '@/modules/dashboard/usuarios/types/usuarios.types';
 import { LoginCredentials, RegisterCredentials, AuthResponse } from '@/core/types/auth.types';
-import { CsvFile, CsvUploadResponse, CsvPreviewData } from '@/modules/uploadFile/types/uploadFile.types';
-import { mockUsuarios, mockAuthResponse, mockCsvFiles, mockCsvPreview } from './mockData';
+import { CsvFile, CsvUploadResponse, CsvPreviewData, Finca } from '@/modules/uploadFile/types/uploadFile.types';
+import { mockUsuarios, mockAuthResponse, mockCsvFiles, mockCsvPreview, mockFincasRaw } from './mockData';
 
 // Simular delay de red
 const delay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -116,7 +116,7 @@ export const mockService = {
   },
 
   // Upload File CSV
-  subirArchivoCsv: async (file: File): Promise<CsvUploadResponse> => {
+  subirArchivoCsv: async (file: File, fincaId?: number): Promise<CsvUploadResponse> => {
     await delay(800);
     
     const nuevoArchivo: CsvFile = {
@@ -175,6 +175,22 @@ export const mockService = {
     }
     
     mockCsvFiles.splice(index, 1);
+  },
+
+  // Fincas
+  obtenerFincas: async (): Promise<Finca[]> => {
+    await delay(300);
+    return mockFincasRaw.map((f) => ({
+      key: f.key,
+      grupo: f.grupo,
+      sigla: f.sigla,
+      moneda: f.moneda,
+      nombre: f.nombre,
+      pagoDia: f.pago_dia,
+      keyValue: f.key_value,
+      tipoSujetoId: f.tipo_sujeto_id,
+      tipoCultivoId: f.tipo_cultivo_id,
+    }));
   },
 };
 

@@ -1,6 +1,6 @@
 import { Usuario } from '@/modules/dashboard/usuarios/types/usuarios.types';
 import { User, AuthResponse } from '@/core/types/auth.types';
-import { CsvFile, CsvPreviewData } from '@/modules/uploadFile/types/uploadFile.types';
+import { CsvFile, CsvPreviewData, Finca } from '@/modules/uploadFile/types/uploadFile.types';
 
 // Mock de usuarios
 export const mockUsuarios: Usuario[] = [
@@ -105,5 +105,42 @@ export const mockCsvPreview: CsvPreviewData = {
   ],
   totalRows: 150,
 };
+
+// Mock de fincas (desde backend)
+export const mockFincasRaw = [
+  {
+    key: 'finca_id',
+    grupo: 'Prueba_Fincas',
+    sigla: 'PRB_F',
+    moneda: 'COP',
+    nombre: '1 - Palmita',
+    pago_dia: 47450,
+    key_value: 2362,
+    tipo_sujeto_id: 1,
+    tipo_cultivo_id: 2,
+  },
+  {
+    key: 'finca_id',
+    grupo: 'Prueba_Fincas',
+    sigla: 'PRB_F',
+    moneda: 'COP',
+    nombre: '1 - Camelias',
+    pago_dia: 47450,
+    key_value: 2364,
+    tipo_sujeto_id: 1,
+    tipo_cultivo_id: 2,
+  },
+  {
+    key: 'finca_id',
+    grupo: 'Prueba_Fincas',
+    sigla: 'PRB_F',
+    moneda: 'COP',
+    nombre: '1 - Campiña',
+    pago_dia: 47450,
+    key_value: 2365,
+    tipo_sujeto_id: 1,
+    tipo_cultivo_id: 2,
+  },
+];
 
 
