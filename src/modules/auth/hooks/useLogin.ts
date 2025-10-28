@@ -12,8 +12,9 @@ export default function useLogin() {
   const mutation = useMutation({
     mutationFn: (credentials: LoginCredentials) => authServices.login(credentials),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
-      toast.success('¡Bienvenido!');
+      const { user, access_token } = data.data;
+      setAuth(user, access_token);
+      toast.success(data.message || '¡Bienvenido!');
       navigate('/dashboard');
     },
     onError: (error: Error) => {

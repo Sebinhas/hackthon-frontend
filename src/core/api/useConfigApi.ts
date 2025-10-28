@@ -6,6 +6,7 @@ export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true', // Evita el warning de ngrok
   },
 });
 
@@ -18,8 +19,16 @@ api.interceptors.request.use((config: any) => {
 });
 
 api.interceptors.response.use(
-  (response: any) => response,
+  (response: any) => {
+    // Manejar respuesta de ngrok
+    if (response.data) {
+      return response;
+    }
+    return response;
+  },
   (error: any) => {
+    console.error('API Error:', error);
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
