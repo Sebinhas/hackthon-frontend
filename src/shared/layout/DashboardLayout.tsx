@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Home, Users } from 'lucide-react';
+import { LogOut, Menu, X, Home, Users, Upload } from 'lucide-react';
 import { useAuthStore } from '@/core/store/authStore';
 import { Button } from '@/components/ui/button';
 
@@ -22,6 +22,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const menuItems = [
     { icon: Home, label: 'Inicio', path: '/dashboard/home' },
     { icon: Users, label: 'Usuarios', path: '/dashboard/usuarios' },
+    { icon: Upload, label: 'Subir CSV', path: '/dashboard/upload-file' },
     
   ];
 

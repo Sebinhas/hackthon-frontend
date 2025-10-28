@@ -10,6 +10,7 @@ import Usuarios from '@/modules/dashboard/usuarios/pages/Usuarios';
 import CreateUsuarios from '@/modules/dashboard/usuarios/pages/CreateUsuarios';
 import EditUsuarios from '@/modules/dashboard/usuarios/pages/EditUsuarios';
 import ProtectedRoute from './ProtectedRoute';
+import UploadFile from '@/modules/uploadFile/pages/UploadFile';
 
 export default function AppRoutes() {
   const loadAuthFromStorage = useAuthStore((state: any) => state.loadAuthFromStorage);
@@ -39,6 +40,9 @@ export default function AppRoutes() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="usuarios/create" element={<CreateUsuarios />} />
         <Route path="usuarios/edit/:id" element={<EditUsuarios />} />
+
+        {/* Upload CSV */}
+        <Route path="upload-file" element={<UploadFile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

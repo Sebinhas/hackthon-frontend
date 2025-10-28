@@ -1,6 +1,7 @@
 import { Usuario, UsuarioPayload } from '@/modules/dashboard/usuarios/types/usuarios.types';
 import { LoginCredentials, RegisterCredentials, AuthResponse } from '@/core/types/auth.types';
-import { mockUsuarios, mockAuthResponse } from './mockData';
+import { CsvFile, CsvUploadResponse, CsvPreviewData } from '@/modules/uploadFile/types/uploadFile.types';
+import { mockUsuarios, mockAuthResponse, mockCsvFiles, mockCsvPreview } from './mockData';
 
 // Simular delay de red
 const delay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -112,6 +113,68 @@ export const mockService = {
     }
     
     usuarios.splice(index, 1);
+  },
+
+  // Upload File CSV
+  subirArchivoCsv: async (file: File): Promise<CsvUploadResponse> => {
+    await delay(800);
+    
+    const nuevoArchivo: CsvFile = {
+      id: generateId(),
+      filename: file.name,
+      size: file.size,
+      uploadDate: new Date().toISOString(),
+      status: 'completed',
+      rowCount: Math.floor(Math.random() * 500) + 10,
+    };
+    
+    mockCsvFiles.push(nuevoArchivo);
+    
+    return {
+      id: nuevoArchivo.id,
+      filename: nuevoArchivo.filename,
+      status: nuevoArchivo.status,
+      message: 'Archivo subido exitosamente',
+    };
+  },
+
+  obtenerArchivosCsv: async (): Promise<CsvFile[]> => {
+    await delay(300);
+    return [...mockCsvFiles];
+  },
+
+  obtenerArchivoCsv: async (id: string): Promise<CsvFile> => {
+    await delay(300);
+    const archivo = mockCsvFiles.find(f => f.id === id);
+    
+    if (!archivo) {
+      throw new Error('Archivo no encontrado');
+    }
+    
+    return archivo;
+  },
+
+  obtenerPreviewArchivo: async (id: string): Promise<CsvPreviewData> => {
+    await delay(400);
+    
+    // Simular preview de archivo
+    if (id) {
+      return mockCsvPreview;
+    }
+    
+    throw new Error('Archivo no encontrado');
+  },
+
+  eliminarArchivoCsv: async (id: string): Promise<void> => {
+    await delay(400);
+    
+    const index = mockCsvFiles.findIndex(f => f.id === id);
+    
+    if (index === -1) {
+      throw new Error('Archivo no encontrado');
+    }
+    
+    mockCsvFiles.splice(index, 1);
   },
 };
 
