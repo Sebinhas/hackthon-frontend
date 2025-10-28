@@ -3,7 +3,7 @@ import { mockService } from '@/shared/mocks/mockService';
 import { LoginCredentials, RegisterCredentials, AuthResponse } from '@/core/types/auth.types';
 
 // Cambiar a true para usar datos mockeados
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export const authServices = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -12,10 +12,13 @@ export const authServices = {
     }
 
     try {
-      const response = await api.post<AuthResponse>('/auth/login', credentials);
+      const response = await api.post<AuthResponse>('/api/v1/auth/login', credentials);
+      console.log('Login response:', response.data);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al iniciar sesión');
+      console.error('Login error:', error.response?.data);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Error al iniciar sesión';
+      throw new Error(errorMessage);
     }
   },
 
@@ -25,9 +28,11 @@ export const authServices = {
     }
 
     try {
-      const response = await api.post<AuthResponse>('/auth/register', credentials);
+      const response = await api.post<AuthResponse>('/api/v1/auth/register', credentials);
+      console.log('Register response:', response.data);
       return response.data;
     } catch (error: any) {
+      console.error('Register error:', error.response?.data);
       throw new Error(error.response?.data?.message || 'Error al registrarse');
     }
   },

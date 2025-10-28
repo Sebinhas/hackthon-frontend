@@ -12,8 +12,9 @@ export default function useRegister() {
   const mutation = useMutation({
     mutationFn: (credentials: RegisterCredentials) => authServices.register(credentials),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
-      toast.success('¡Registro exitoso!');
+      const { user, access_token } = data.data;
+      setAuth(user, access_token);
+      toast.success(data.message || '¡Registro exitoso!');
       navigate('/dashboard');
     },
     onError: (error: Error) => {
