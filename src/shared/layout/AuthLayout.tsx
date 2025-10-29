@@ -30,7 +30,7 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
         />
         
         {/* Overlay con gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#AA0F16]/90 to-[#8B0C12]/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#AA0F16]/100 to-[#8B0C12]/50" />
         
         {/* Contenido de bienvenida */}
         <div className="relative z-10 flex flex-col justify-center p-12 text-white">

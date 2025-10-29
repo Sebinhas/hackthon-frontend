@@ -3,7 +3,7 @@ import { fincasService } from '../services/fincas.service';
 
 export const useObtenerFincas = () => {
   return useQuery({
-    queryKey: ['fincas'],
+    queryKey: ['dashboard-fincas'],
     queryFn: () => fincasService.obtenerFincas(),
     staleTime: 5 * 60 * 1000,
   });
