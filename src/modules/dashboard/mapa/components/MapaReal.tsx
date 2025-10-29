@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Lote, COLORES_ESTADO, Planta } from '@/modules/dashboard/mapa/types/lotes.types';
+import { Lote, COLORES_ESTADO, Planta, Linea } from '@/modules/dashboard/mapa/types/lotes.types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ interface MapaRealProps {
   trabajadoresData?: any[];
   plantasDelLote: Planta[];
   loteSeleccionado: Lote | null;
+  lineas?: Linea[]; // Líneas con nombres para mostrar
 }
 
 type VistaActual = 'lotes' | 'plantas';
@@ -27,6 +28,7 @@ export const MapaReal = ({
   mostrarLeyenda = true,
   plantasDelLote,
   loteSeleccionado,
+  lineas = [],
 }: MapaRealProps) => {
   const [tipoMapa, setTipoMapa] = useState<'satellite' | 'roadmap'>('satellite');
   const [mapaListo, setMapaListo] = useState(false);
@@ -96,12 +98,12 @@ export const MapaReal = ({
 
       googleMapRef.current = new google.maps.Map(mapRef.current, {
         center: centroMapa,
-        zoom: vistaActual === 'plantas' ? 16 : 14,
         mapTypeId: tipoMapa,
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
         zoomControl: true,
+        gestureHandling: 'greedy', // Permitir zoom con gestos sin necesidad de Ctrl
       });
 
       google.maps.event.addListenerOnce(googleMapRef.current, 'idle', () => {
@@ -161,9 +163,9 @@ export const MapaReal = ({
         paths: paths,
           strokeColor: colors.color,
         strokeOpacity: 1,
-          strokeWeight: 2,
-          fillColor: colors.fillColor,
-        fillOpacity: 0.5,
+          strokeWeight: 2.5,
+          fillColor: 'transparent', // Sin relleno de color
+        fillOpacity: 0, // Sin opacidad de relleno
         map: googleMapRef.current,
         clickable: true,
         });
@@ -364,6 +366,13 @@ export const MapaReal = ({
           </p>
         </Card>
       )}
+       {vistaActual === 'plantas' && plantasDelLote.length > 0 && (
+        <Card className="p-3 bg-green-50 border-green-200">
+          <p className="text-sm text-green-900">
+            🌱 <strong>Spots georeferenciados:</strong> Cada polígono representa un spot con su ubicación exacta. Los verdes están plantados, los grises están vacíos.
+          </p>
+        </Card>
+      )}
 
       {/* Mapa */}
       <Card className="overflow-hidden relative">
@@ -374,6 +383,7 @@ export const MapaReal = ({
             spots={plantasDelLote} 
             mostrarLineas={mostrarLineas}
             mostrarPoligonos={mostrarPoligonos}
+            lineas={lineas}
           />
         )}
         {!mapaListo && (
@@ -387,13 +397,7 @@ export const MapaReal = ({
       </Card>
 
 
-      {vistaActual === 'plantas' && plantasDelLote.length > 0 && (
-        <Card className="p-3 bg-green-50 border-green-200">
-          <p className="text-sm text-green-900">
-            🌱 <strong>Spots georeferenciados:</strong> Cada polígono representa un spot con su ubicación exacta. Los verdes están plantados, los grises están vacíos.
-          </p>
-        </Card>
-      )}
+     
     </div>
   );
 };
