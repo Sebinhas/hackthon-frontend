@@ -88,8 +88,8 @@ export const useTour = () => {
           align: step.popover.align || 'start',
           // En el último paso, mostrar botón "Finalizar" en lugar de "Siguiente"
           doneBtnText: isLastStep ? 'Finalizar' : undefined,
-          nextBtnText: 'Siguiente',
-          prevBtnText: 'Anterior',
+          nextBtnText: '',
+          prevBtnText: '',
           closeBtnText: '×',
         },
       };
