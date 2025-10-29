@@ -85,8 +85,7 @@ export default function Lotes() {
       <DataTable
         data={lotes}
         columns={columns}
-        filterPlaceholder="Buscar lote por nombre..."
-        filterKey="nombre"
+        filterPlaceholder="Buscar en todas las columnas..."
         pageSizeOptions={[5, 10, 15, 20]}
         defaultPageSize={10}
       />
