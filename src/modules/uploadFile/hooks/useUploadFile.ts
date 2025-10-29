@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { uploadFileService } from '../services/uploadFile.service';
+import { fincasService } from '@/modules/dashboard/fincas/services/fincas.service';
 import { CsvFile, CsvPreviewData, ValidationSummary, CsvRow } from '../types/uploadFile.types';
 import { FileCell, StatusCell, RowCountCell, ActionsCell } from '../components/UploadFileCellTemplates';
 import { transformarCsvValidado, generarCsvString, descargarCsv } from '../utils/csvGenerator';
@@ -65,7 +66,7 @@ export const useObtenerPreviewArchivo = (id: string) => {
 export const useObtenerFincas = () => {
   return useQuery({
     queryKey: ['fincas'],
-    queryFn: () => uploadFileService.obtenerFincas(),
+    queryFn: () => fincasService.obtenerFincas(),
   });
 };
 

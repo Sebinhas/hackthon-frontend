@@ -1,14 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { SelectorFincas } from './SelectorFincas';
 import { useObtenerFincas, useObtenerLotesPorFinca, useObtenerPlantasPorLote, useObtenerLineasPorLote } from '../hooks/useFincasLotes';
 import { Spinner } from '@/components/ui/spinner';
 import { MapaReal } from './MapaReal';
-import { Lote } from '../types/lotes.types';
+import { Lote, Planta } from '../types/lotes.types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import { Info, Send } from 'lucide-react';
 import { mockLotes } from '@/shared/mocks/mockData';
+import UploadFile from '@/modules/uploadFile/pages/UploadFile';
+import { Finca } from '../../fincas/types/fincas.types';
+import { ValidationCompleteData } from '@/modules/uploadFile/types/uploadFile.types';
+import { toast } from 'sonner';
 
 export const VistaLotesMapa: React.FC = () => {
   // Usar URL state para persistir selecciones
@@ -22,6 +28,11 @@ export const VistaLotesMapa: React.FC = () => {
     fincaIdFromUrl ? parseInt(fincaIdFromUrl) : null
   );
   const [loteSeleccionado, setLoteSeleccionadoState] = useState<string | null>(loteIdFromUrl);
+  const [tabActual, setTabActual] = useState<string>('previsualizar');
+  
+  // Estado para datos validados del CSV
+  const [datosValidadosCsv, setDatosValidadosCsv] = useState<ValidationCompleteData | null>(null);
+  const [enviandoASioma, setEnviandoASioma] = useState(false);
 
   // Hooks para obtener datos
   const { data: fincas = [], isLoading: isLoadingFincas } = useObtenerFincas();
@@ -75,8 +86,9 @@ export const VistaLotesMapa: React.FC = () => {
     }
     setSearchParams(newParams);
     
-    // Resetear lote seleccionado
+    // Resetear lote seleccionado y datos del CSV
     setLoteSeleccionadoState(null);
+    setDatosValidadosCsv(null); // Limpiar datos del CSV al cambiar finca
   };
 
   // Obtener el lote seleccionado completo
@@ -97,6 +109,63 @@ export const VistaLotesMapa: React.FC = () => {
     setSearchParams(newParams);
   };
 
+  // Función para manejar validación exitosa del CSV
+  const handleValidationSuccess = (data: ValidationCompleteData) => {
+    setDatosValidadosCsv(data);
+    toast.success('Archivo validado correctamente. Cambia al tab "Previsualizar" para ver los spots en el mapa.');
+  };
+
+  // Función para limpiar validación
+  const handleClearValidation = () => {
+    setDatosValidadosCsv(null);
+  };
+
+  // Función para enviar datos a Sioma
+  const handleEnviarASioma = async () => {
+    if (!datosValidadosCsv) return;
+
+    setEnviandoASioma(true);
+    try {
+      // Importar dinámicamente el servicio de Sioma
+      const { siomaService } = await import('../services/sioma.service');
+      
+      // Enviar datos a la API de Sioma
+      await siomaService.enviarDatosASioma(datosValidadosCsv);
+      
+      toast.success(`Datos enviados exitosamente a Sioma (${datosValidadosCsv.csvRows.length} registros)`);
+      setDatosValidadosCsv(null); // Limpiar después de enviar exitosamente
+    } catch (error: any) {
+      console.error('Error al enviar datos a Sioma:', error);
+      toast.error(`Error al enviar datos: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setEnviandoASioma(false);
+    }
+  };
+
+  // Convertir datos del CSV a formato Planta para visualización en el mapa
+  const spotsDeLoteCsv = useMemo<Planta[]>(() => {
+    if (!datosValidadosCsv || !loteSeleccionado) return [];
+
+    // Obtener el nombre del lote seleccionado
+    const loteData = lotes.find(l => l.id === loteSeleccionado);
+    if (!loteData) return [];
+
+    // Filtrar spots del CSV que pertenecen al lote seleccionado
+    return datosValidadosCsv.csvRows
+      .filter(row => row.Lote === loteData.nombre)
+      .map(row => ({
+        nombre_spot: `${row.Lote}-L${row.Linea}-S${row.Palma}`,
+        lat: parseFloat(row.Latitud),
+        lng: parseFloat(row.Longitud),
+        lote_id: parseInt(loteSeleccionado),
+        linea: parseInt(row.Linea),
+        posicion: parseInt(row.Palma),
+        nombre_planta: `${row.Lote}-L${row.Linea}-P${row.Palma}`,
+        finca_id: datosValidadosCsv.fincaId,
+        cargado: true,
+      }));
+  }, [datosValidadosCsv, loteSeleccionado, lotes]);
+
   return (
     <div className="w-full h-full flex flex-col gap-6">
       {/* Header con información */}
@@ -109,23 +178,59 @@ export const VistaLotesMapa: React.FC = () => {
         </div>
       </div>
 
-      {/* Paso 1: Selector de Finca */}
+      {/* Paso 1: Selector de Finca y Botón de Envío */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Paso 1: Seleccionar Finca</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <SelectorFincas
-            fincas={fincas}
+            fincas={fincas as Finca[]}
             fincaSeleccionada={fincaSeleccionada}
             onFincaChange={handleFincaChange}
             isLoading={isLoadingFincas}
           />
+          
+          {/* Botón para enviar datos a Sioma */}
+          {datosValidadosCsv && (
+            <div className="flex items-center justify-end gap-2 pt-2 border-t">
+              <div className="flex items-center gap-2 text-sm text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Archivo validado ({datosValidadosCsv.csvRows.length} registros)</span>
+              </div>
+              <Button
+                onClick={handleEnviarASioma}
+                disabled={enviandoASioma}
+                className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {enviandoASioma ? 'Enviando...' : 'Enviar a Sioma'}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Mostrar mapa con lotes de la finca si hay finca seleccionada */}
-      {fincaSeleccionada && (
+      {/* Tabs de Validación y Previsualización */}
+      {fincaSeleccionada ? (
+        <Tabs value={tabActual} onValueChange={setTabActual} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="validacion">Validación</TabsTrigger>
+            <TabsTrigger value="previsualizar">Previsualizar</TabsTrigger>
+          </TabsList>
+
+          {/* Tab de Validación */}
+          <TabsContent value="validacion" className="space-y-4">
+            <UploadFile 
+              fincaId={fincaSeleccionada} 
+              onValidationSuccess={handleValidationSuccess}
+              onClearValidation={handleClearValidation}
+            />
+          </TabsContent>
+
+          {/* Tab de Previsualización */}
+          <TabsContent value="previsualizar" className="space-y-4">
+            {fincaSeleccionada && (
         <>
           {/* Mapa con lotes de la finca */}
           <Card className="flex-1">
@@ -150,7 +255,7 @@ export const VistaLotesMapa: React.FC = () => {
                   <div className="space-y-3">
                     <div>
                       <h3 className="font-medium">{loteActual.nombre}</h3>
-                      <p className="text-sm text-muted-foreground">{loteActual.codigo}</p>
+                      <p className="text-sm text-muted-foreground">{loteActual.nombre}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
@@ -238,7 +343,12 @@ export const VistaLotesMapa: React.FC = () => {
                   return (
                     <div className="flex flex-col items-center justify-center h-full">
                       <Spinner size="lg" />
-                      <p className="text-sm text-gray-500 mt-4">Cargando lotes de la finca...</p>
+                      <p className="text-sm text-gray-500 mt-4">
+                        Cargando lotes y coordenadas de la finca...
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Esto puede tardar unos segundos
+                      </p>
                     </div>
                   );
                 }
@@ -260,11 +370,11 @@ export const VistaLotesMapa: React.FC = () => {
                 return (
                   <>
                     <MapaReal
-                      lotes={lotes}
+                      lotes={lotes as Lote[]}
                       height="800px"
                       onLoteClick={handleLoteClick}
                       mostrarLeyenda={true}
-                      plantasDelLote={plantas}
+                      plantasDelLote={spotsDeLoteCsv.length > 0 ? spotsDeLoteCsv : plantas}
                       loteSeleccionado={loteActual || null}
                       lineas={lineas}
                     />
@@ -286,9 +396,10 @@ export const VistaLotesMapa: React.FC = () => {
           {/* Mapa de spots: mostrado en el mismo mapa superior (MapaReal) al seleccionar lote */}
         </>
       )}
-
-      {/* Mensaje inicial si no hay finca seleccionada */}
-      {!fincaSeleccionada && (
+          </TabsContent>
+        </Tabs>
+      ) : (
+        /* Mensaje inicial si no hay finca seleccionada */
         <Card className="flex-1">
           <CardContent className="flex items-center justify-center h-[400px]">
             <div className="text-center">

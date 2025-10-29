@@ -71,7 +71,7 @@ export interface CsvRow {
   Lote: string;
   Linea: string;
   Palma: string;
-  Logitud: string;
+  Longitud: string;
   Latitud: string;
   [key: string]: string | number;
 }

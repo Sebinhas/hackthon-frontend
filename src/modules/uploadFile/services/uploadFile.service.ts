@@ -1,5 +1,5 @@
 import { api } from '@/core/api/useConfigApi';
-import { CsvFile, CsvUploadResponse, CsvPreviewData, Finca, FincasResponse } from '../types/uploadFile.types';
+import { CsvFile, CsvUploadResponse, CsvPreviewData } from '../types/uploadFile.types';
 import { LotesResponse, Lote } from '@/modules/dashboard/lotes/types/lotes.types';
 
 export const uploadFileService = {
@@ -57,26 +57,6 @@ export const uploadFileService = {
     }
   },
 
-  obtenerFincas: async (): Promise<Finca[]> => {
-    try {
-      const response = await api.get<FincasResponse>('/api/v1/fincas');
-      
-      // El backend devuelve { status, message, data: Finca[] }
-      if (response.data.data && Array.isArray(response.data.data)) {
-        return response.data.data;
-      }
-      
-      // Fallback si la estructura es diferente
-      if (Array.isArray(response.data)) {
-        return response.data;
-      }
-      
-      throw new Error('Formato de respuesta de fincas inválido');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Error al obtener fincas';
-      throw new Error(errorMessage);
-    }
-  },
 
   obtenerLotesCompletos: async (): Promise<Lote[]> => {
     try {

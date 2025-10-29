@@ -44,7 +44,7 @@ export const transformarCsvValidado = (
     const linea = String(row.Linea || '').trim();
     const posicion = String(row.Palma || '').trim();
     const latitud = String(row.Latitud || '').trim();
-    const longitud = String(row.Logitud || '').trim();
+    const longitud = String(row.Longitud || '').trim();
     
     // iterationSpot es el número de fila (index + 1)
     const iterationSpot = index + 1;

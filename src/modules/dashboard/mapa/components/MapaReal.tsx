@@ -174,7 +174,8 @@ export const MapaReal = ({
         content: `
           <div style="padding: 10px; min-width: 200px;">
             <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${lote.nombre}</h3>
-            <p style="color: #666; font-size: 12px; margin-bottom: 10px;">${lote.codigo}</p>
+            <p style="color: #666; font-size: 12px; margin-bottom: 5px;">${lote.codigo}</p>
+            <p style="color: #888; font-size: 11px; margin-bottom: 10px;">ID: ${lote.id}</p>
             <div style="font-size: 13px;">
               <div style="display: flex; justify-content: space-between; margin: 3px 0;">
                 <span style="color: #666;">Estado:</span>
