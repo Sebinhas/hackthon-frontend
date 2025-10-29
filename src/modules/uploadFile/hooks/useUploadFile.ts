@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { uploadFileService } from '../services/uploadFile.service';
-import { CsvFile, Finca, CsvPreviewData } from '../types/uploadFile.types';
+import { CsvFile, CsvPreviewData, ValidationSummary, CsvRow } from '../types/uploadFile.types';
 import { FileCell, StatusCell, RowCountCell, ActionsCell } from '../components/UploadFileCellTemplates';
+import { transformarCsvValidado, generarCsvString, descargarCsv } from '../utils/csvGenerator';
+import { Lote } from '@/modules/dashboard/lotes/types/lotes.types';
 
 // Hooks React Query Base
 export const useObtenerArchivosCsv = () => {
@@ -73,8 +75,9 @@ export const useUploadFilePage = () => {
   const eliminarArchivo = useEliminarArchivoCsv();
   const [archivoAEliminar, setArchivoAEliminar] = useState<string | null>(null);
   const [archivoAVer, setArchivoAVer] = useState<string | null>(null);
-  const [selectedFincaId, setSelectedFincaId] = useState<number | null>(null);
-  const [localPreviewData, setLocalPreviewData] = useState<CsvPreviewData | null>(null);
+  const [validationSummary, setValidationSummary] = useState<ValidationSummary | null>(null);
+  const [previewData, setPreviewData] = useState<CsvPreviewData | null>(null);
+  const [validationData, setValidationData] = useState<{ csvRows: CsvRow[]; fincaId: number } | null>(null);
 
   const handleDeleteConfirm = () => {
     if (archivoAEliminar) {
@@ -91,12 +94,56 @@ export const useUploadFilePage = () => {
     setArchivoAVer(null);
   };
 
-  const openLocalPreview = (data: CsvPreviewData) => {
-    setLocalPreviewData(data);
+  const handleValidationComplete = (
+    summary: ValidationSummary,
+    data: CsvPreviewData,
+    validationDataParam?: { csvRows: CsvRow[]; fincaId: number }
+  ) => {
+    setValidationSummary(summary);
+    setPreviewData(data);
+    if (validationDataParam) {
+      setValidationData(validationDataParam);
+    }
   };
 
-  const closeLocalPreview = () => {
-    setLocalPreviewData(null);
+  const clearValidation = () => {
+    setValidationSummary(null);
+    setPreviewData(null);
+    setValidationData(null);
+  };
+
+  const handleDownloadCsv = async () => {
+    if (!validationData) {
+      toast.error('No hay datos validados para descargar');
+      return;
+    }
+
+    try {
+      // Obtener todos los lotes para el mapeo
+      const todosLosLotes = await uploadFileService.obtenerLotesCompletos();
+      
+      // Filtrar lotes por fincaId
+      const lotesDeLaFinca = todosLosLotes.filter((lote: Lote) => lote.fincaId === validationData.fincaId);
+      
+      // Transformar datos
+      const datosTransformados = transformarCsvValidado(
+        validationData.csvRows,
+        lotesDeLaFinca,
+        validationData.fincaId
+      );
+      
+      // Generar CSV
+      const csvContent = generarCsvString(datosTransformados);
+      
+      // Descargar
+      const nombreArchivo = `archivo_procesado_${new Date().getTime()}.csv`;
+      descargarCsv(csvContent, nombreArchivo);
+      
+      toast.success('CSV generado y descargado exitosamente');
+    } catch (error: any) {
+      console.error('Error al generar CSV:', error);
+      toast.error(`Error al generar el CSV: ${error.message || 'Error desconocido'}`);
+    }
   };
 
   const columns = [
@@ -139,11 +186,11 @@ export const useUploadFilePage = () => {
     archivoAVer,
     handleViewFile,
     handleClosePreview,
-    selectedFincaId,
-    setSelectedFincaId,
-    localPreviewData,
-    openLocalPreview,
-    closeLocalPreview,
+    validationSummary,
+    previewData,
+    handleValidationComplete,
+    clearValidation,
+    handleDownloadCsv,
+    validationData,
   };
 };
-
