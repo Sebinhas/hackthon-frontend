@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Home, ChevronDown, User as UserIcon, Building, MapPin, Layers } from 'lucide-react';
+import { LogOut, Menu, X, Home, ChevronDown, User as UserIcon, Building, MapPin, Layers, HelpCircle } from 'lucide-react';
 import { useAuthStore } from '@/core/store/authStore';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/shared/utils/cn';
+import { useTour, TourStep } from '@/shared/hooks/useTour';
 import logo from '@/assets/landing/Logo.png';
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -21,7 +22,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, clearAuth } = useAuthStore();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { startTour, shouldShowTour, stopTour } = useTour();
 
   // Establecer estado inicial basado en el tamaño de pantalla
   useEffect(() => {
@@ -68,11 +70,59 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const menuItems = [
-    { icon: Home, label: 'Inicio', path: '/dashboard/home' },
-    { icon: Building, label: 'Fincas', path: '/dashboard/fincas' },
-    { icon: Layers, label: 'Lotes', path: '/dashboard/lotes' },
-    { icon: MapPin, label: 'Geodatos', path: '/dashboard/mapa' },
+    { icon: Home, label: 'Inicio', path: '/dashboard/home', tourId: 'tour-home', description: 'Aquí encontrarás un resumen general del sistema y estadísticas importantes' },
+    { icon: Building, label: 'Fincas', path: '/dashboard/fincas', tourId: 'tour-fincas', description: 'Gestiona todas tus fincas: crea, edita y visualiza la información de cada una' },
+    { icon: Layers, label: 'Lotes', path: '/dashboard/lotes', tourId: 'tour-lotes', description: 'Administra los lotes de tus fincas, visualiza coordenadas y gestiona la información detallada' },
+    { icon: MapPin, label: 'Geodatos', path: '/dashboard/mapa', tourId: 'tour-geodatos', description: 'Visualiza tus fincas y lotes en mapas interactivos con información geográfica detallada' },
   ];
+
+  const handleStartTour = () => {
+    const steps = menuItems.map((item, index): TourStep => {
+      let side: 'top' | 'right' | 'bottom' | 'left' = 'right';
+      if (index === 0) {
+        side = 'right';
+      } else if (index === menuItems.length - 1) {
+        side = 'left';
+      } else {
+        side = 'right';
+      }
+
+      return {
+        element: `[data-tour="${item.tourId}"]`,
+        popover: {
+          title: item.label,
+          description: item.description,
+          side,
+          align: 'start' as const,
+        },
+      };
+    });
+
+    // Agregar paso del botón de ayuda
+    steps.push({
+      element: '[data-tour="tour-help-button"]',
+      popover: {
+        title: '¿Necesitas ayuda?',
+        description: 'Puedes iniciar este recorrido guiado en cualquier momento haciendo clic en este botón de ayuda',
+        side: 'bottom' as const,
+        align: 'start' as const,
+      },
+    });
+
+    startTour(steps);
+  };
+
+  useEffect(() => {
+    const checkAndStartTour = () => {
+      if (shouldShowTour() && isSidebarOpen && window.innerWidth >= 1024) {
+        const timer = setTimeout(() => {
+          handleStartTour();
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    };
+    checkAndStartTour();
+  }, []);
 
   const isActiveRoute = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -184,6 +234,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Link
                   key={item.path}
                   to={item.path}
+                  data-tour={item.tourId}
                   className={cn(
                     "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     "hover:opacity-80",
@@ -220,6 +271,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Link
                   key={item.path}
                   to={item.path}
+                  data-tour={item.tourId}
                   onClick={() => {
                     setIsSidebarOpen(false);
                   }}
@@ -253,11 +305,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             "ml-0"
           )}
         >
-          <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-w-7xl mx-auto w-full">
+          <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-w-7xl mx-auto w-full relative">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Botón flotante de ayuda */}
+      <Button
+        data-tour="tour-help-button"
+        onClick={handleStartTour}
+        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-[#AA0F16] hover:bg-[#8B0C12] text-white shadow-lg hover:shadow-xl transition-all duration-200 z-40 flex items-center justify-center"
+        aria-label="Iniciar recorrido guiado"
+      >
+        <HelpCircle className="h-6 w-6" />
+      </Button>
     </div>
   );
 }

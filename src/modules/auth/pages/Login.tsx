@@ -113,16 +113,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Olvidé mi contraseña */}
-          <div className="flex justify-end">
-            <Link
-              to="/auth/forgot-password"
-              className="text-sm text-[#AA0F16] hover:text-[#8B0C12] transition-colors duration-200"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-
           {/* Botón de envío */}
           <Button
             type="submit"
