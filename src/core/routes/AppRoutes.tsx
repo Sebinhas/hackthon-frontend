@@ -9,10 +9,7 @@ import DashboardHome from '@/modules/dashboard/home/pages/Home';
 import Usuarios from '@/modules/dashboard/usuarios/pages/Usuarios';
 import CreateUsuarios from '@/modules/dashboard/usuarios/pages/CreateUsuarios';
 import EditUsuarios from '@/modules/dashboard/usuarios/pages/EditUsuarios';
-import LotesListView from '@/modules/dashboard/lotes/pages/LotesListView';
-import LoteCreateView from '@/modules/dashboard/lotes/pages/LoteCreateView';
-import LoteDetailView from '@/modules/dashboard/lotes/pages/LoteDetailView';
-import LoteEditView from '@/modules/dashboard/lotes/pages/LoteEditView';
+import Mapa from '@/modules/dashboard/mapa/pages/Lotes';
 import Fincas from '@/modules/dashboard/fincas/pages/Fincas';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
@@ -67,11 +64,8 @@ export default function AppRoutes() {
         {/* Upload CSV */}
         <Route path="upload-file" element={<UploadFile />} />
         
-        {/* Lotes */}
-        <Route path="lotes" element={<LotesListView />} />
-        <Route path="lotes/nuevo" element={<LoteCreateView />} />
-        <Route path="lotes/:id" element={<LoteDetailView />} />
-        <Route path="lotes/:id/editar" element={<LoteEditView />} />
+        {/* Mapa */}
+        <Route path="mapa" element={<Mapa />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

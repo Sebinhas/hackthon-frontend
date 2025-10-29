@@ -8,6 +8,14 @@ export interface Coordenada {
   lng: number;
 }
 
+// Interfaz para líneas
+export interface Linea {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  finca_id: number;
+  coordenadas: Coordenada[];
+}
 // Estados posibles de un lote (sincronizado con backend)
 export enum EstadoLote {
   EN_CRECIMIENTO = 'EN_CRECIMIENTO',
@@ -107,6 +115,57 @@ export interface Lote {
   // Imágenes y documentos
   imagenes?: string[];
   documentos?: string[];
+}
+
+// Interfaz para datos de lote desde mock (estructura original)
+export interface LoteMock {
+  id_local: string;
+  id_remoto: number;
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  finca_id: number;
+  finca_externa_id: number;
+  coordenadas_geojson: {
+    type: "Polygon";
+    coordinates: number[][][];
+  };
+  area_hectareas: number;
+  perimetro_metros: number;
+  altitud_msnm: number;
+  cultivo: {
+    id: string;
+    nombre: string;
+    tipo_cultivo_id: number;
+  };
+  estado: EstadoLote;
+  actividades: {
+    ultima_fecha: string;
+    proxima: string;
+  };
+  suelo: {
+    tipo: string;
+    ph: number;
+    topografia: string;
+  };
+  infraestructura: {
+    sistema_riego: string;
+    tiene_cerca: boolean;
+    tiene_sombra: boolean;
+    acceso_vehicular: boolean;
+  };
+  referencia_externa: {
+    grupo: string;
+    sigla: string;
+    tipo_sujeto_id: number;
+    fuente: string;
+  };
+  metadatos: {
+    fecha_creacion: string;
+    fecha_ultima_modificacion: string;
+    notas: string;
+    timestamp_sincronizacion: string;
+  };
 }
 
 // DTO para crear lote
@@ -213,7 +272,7 @@ export interface Finca {
   lote_id: string;  // Asociación con el lote
 }
 
-// Interfaz de Planta
+// Interfaz de Planta/Spot
 export interface Planta {
   nombre_spot: string;  // "L29347L50S1"
   lat: number;
@@ -224,5 +283,35 @@ export interface Planta {
   nombre_planta: string;  // "L29347L50P54"
   finca_id: number;
   estado?: EstadoLote;
+  cargado?: boolean;  // true si fue importado desde CSV, false si es spot vacío
+  coordenadas_poligono?: Coordenada[];  // Coordenadas del polígono del spot
 }
+
+// Configuración de tamaño de spots (polígonos)
+export interface SpotConfig {
+  ancho_metros: number;  // Ancho del spot en metros
+  alto_metros: number;   // Alto del spot en metros
+  espaciado_metros: number;  // Espaciado entre spots
+}
+
+// Configuración por defecto para spots
+export const SPOT_CONFIG_DEFAULT: SpotConfig = {
+  ancho_metros: 1.5,  // 1.5 metros de ancho
+  alto_metros: 1.5,   // 1.5 metros de alto
+  espaciado_metros: 0.5  // 0.5 metros de separación
+};
+
+// Colores para spots según si están cargados o no
+export const COLORES_SPOT = {
+  CARGADO: {
+    fill: '#22c55e',  // Verde para spots con datos
+    stroke: '#16a34a',
+    opacity: 0.7
+  },
+  VACIO: {
+    fill: '#9ca3af',  // Gris para spots vacíos
+    stroke: '#6b7280',
+    opacity: 0.4
+  }
+};
 

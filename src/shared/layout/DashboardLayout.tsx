@@ -31,7 +31,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Home, label: 'Inicio', path: '/dashboard/home' },
     { icon: Users, label: 'Usuarios', path: '/dashboard/usuarios' },
     { icon: Building, label: 'Fincas', path: '/dashboard/fincas' },
-    { icon: MapPin, label: 'Lotes', path: '/dashboard/lotes' },
+    { icon: MapPin, label: 'Mapa', path: '/dashboard/mapa' },
     { icon: Upload, label: 'Subir CSV', path: '/dashboard/upload-file' },
   ];
 
