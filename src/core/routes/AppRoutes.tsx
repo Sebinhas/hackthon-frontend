@@ -9,7 +9,11 @@ import DashboardHome from '@/modules/dashboard/home/pages/Home';
 import Usuarios from '@/modules/dashboard/usuarios/pages/Usuarios';
 import CreateUsuarios from '@/modules/dashboard/usuarios/pages/CreateUsuarios';
 import EditUsuarios from '@/modules/dashboard/usuarios/pages/EditUsuarios';
+import Mapa from '@/modules/dashboard/mapa/pages/Lotes';
+import Fincas from '@/modules/dashboard/fincas/pages/Fincas';
+import Lotes from '@/modules/dashboard/lotes/pages/Lotes';
 import ProtectedRoute from './ProtectedRoute';
+import PublicRoute from './PublicRoute';
 import UploadFile from '@/modules/uploadFile/pages/UploadFile';
 
 export default function AppRoutes() {
@@ -22,8 +26,22 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/auth/login" element={<Login />} />
-      <Route path="/auth/register" element={<Register />} />
+      <Route
+        path="/auth/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
       
       <Route
         path="/dashboard"
@@ -41,8 +59,17 @@ export default function AppRoutes() {
         <Route path="usuarios/create" element={<CreateUsuarios />} />
         <Route path="usuarios/edit/:id" element={<EditUsuarios />} />
 
+        {/* Fincas */}
+        <Route path="fincas" element={<Fincas />} />
+
+        {/* Lotes */}
+        <Route path="lotes" element={<Lotes />} />
+
         {/* Upload CSV */}
         <Route path="upload-file" element={<UploadFile />} />
+        
+        {/* Mapa */}
+        <Route path="mapa" element={<Mapa />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

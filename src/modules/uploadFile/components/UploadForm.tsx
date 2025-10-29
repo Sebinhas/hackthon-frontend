@@ -1,15 +1,27 @@
 import { useState } from 'react';
-import { Upload, FileSpreadsheet, Download } from 'lucide-react';
+import { CheckCircle2, FileSpreadsheet, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSubirArchivoCsv } from '../hooks/useUploadFile';
+import { toast } from 'sonner';
+import Papa from 'papaparse';
+import { uploadFileService } from '../services/uploadFile.service';
+import { validarCsv } from '../utils/csvValidator';
+import { CsvRow, ValidationSummary } from '../types/uploadFile.types';
 
-export const UploadForm = () => {
+interface UploadFormProps {
+  fincaId: number | null;
+  onValidationComplete: (
+    summary: ValidationSummary,
+    previewData: { headers: string[]; rows: Record<string, any>[]; totalRows: number },
+    validationData?: { csvRows: CsvRow[]; fincaId: number }
+  ) => void;
+}
+
+export const UploadForm = ({ fincaId, onValidationComplete }: UploadFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const subirArchivo = useSubirArchivoCsv();
+  const [isValidating, setIsValidating] = useState(false);
 
   const handleDownloadTemplate = () => {
-    const headers = ['Lote', 'Linea', 'Palma', 'Logitud', 'Latitud'];
-    // Agregar BOM para compatibilidad con Excel y UTF-8
+    const headers = ['Lote', 'Linea', 'Palma', 'Longitud', 'Latitud'];
     const csvContent = '\uFEFF' + headers.join(',') + '\n';
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -28,24 +40,165 @@ export const UploadForm = () => {
       if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
         setSelectedFile(file);
       } else {
-        alert('Por favor, selecciona un archivo CSV');
+        toast.error('Por favor, selecciona un archivo CSV');
         event.target.value = '';
       }
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (selectedFile) {
-      subirArchivo.mutate(selectedFile, {
-        onSuccess: () => {
-          setSelectedFile(null);
-          if (document.querySelector('input[type="file"]')) {
-            (document.querySelector('input[type="file"]') as HTMLInputElement).value = '';
+    if (fincaId === null) {
+      toast.error('Debes seleccionar una finca primero.');
+      return;
+    }
+
+    if (!selectedFile) {
+      toast.error('Selecciona un archivo CSV para continuar.');
+      return;
+    }
+
+    setIsValidating(true);
+
+    try {
+      // Obtener lotes válidos para la finca
+      let lotesValidos: string[] = [];
+      try {
+        lotesValidos = await uploadFileService.obtenerLotesValidosPorFinca(fincaId);
+        console.log('Lotes válidos obtenidos:', lotesValidos);
+      } catch (errorLotes: any) {
+        console.error('Error al obtener lotes:', errorLotes);
+        toast.error(`Error al obtener lotes válidos: ${errorLotes.message || 'Error desconocido'}`);
+        setIsValidating(false);
+        return;
+      }
+
+      // Parsear CSV con papaparse usando FileReader
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = String(reader.result || '');
+          
+          const parseResult = Papa.parse<any>(text, {
+            header: true,
+            skipEmptyLines: true,
+          });
+          
+          if (parseResult.errors.length > 0) {
+            console.error('Errores de parsing:', parseResult.errors);
+            toast.error(`Error al parsear CSV: ${parseResult.errors[0].message}`);
+            setIsValidating(false);
+            return;
           }
-        },
-      });
+          
+          const data = parseResult.data;
+          console.log('Datos parseados:', data);
+          
+          if (data.length === 0) {
+            toast.error('El archivo CSV está vacío o no contiene datos válidos.');
+            setIsValidating(false);
+            return;
+          }
+
+          // Validar headers requeridos
+          const headersEsperados = ['Lote', 'Linea', 'Palma', 'Longitud', 'Latitud'];
+          const headersReales = Object.keys(data[0] || {});
+          const headersFaltantes = headersEsperados.filter(h => !headersReales.includes(h));
+          
+          if (headersFaltantes.length > 0) {
+            toast.error(`Columnas faltantes: ${headersFaltantes.join(', ')}`);
+            setIsValidating(false);
+            return;
+          }
+
+          // Convertir a formato CsvRow con número de fila y filtrar filas completamente vacías
+          // Primero, mantenemos el índice original para el número de fila
+          let filaReal = 2; // Empezamos en 2 porque la fila 1 son headers
+          const csvRows: CsvRow[] = [];
+          
+          data.forEach((row) => {
+            const lote = String(row.Lote || '').trim();
+            const linea = String(row.Linea || '').trim();
+            const palma = String(row.Palma || '').trim();
+            const longitud = String(row.Longitud || '').trim();
+            const latitud = String(row.Latitud || '').trim();
+            
+            // Verificar si la fila está completamente vacía
+            const filaVacia = !lote && !linea && !palma && !longitud && !latitud;
+            
+            if (!filaVacia) {
+              // Solo agregar filas que no estén completamente vacías
+              csvRows.push({
+                rowNumber: filaReal,
+                Lote: lote,
+                Linea: linea,
+                Palma: palma,
+                Longitud: longitud,
+                Latitud: latitud,
+              });
+            }
+            
+            filaReal++; // Incrementar el contador de fila real siempre, para mantener la numeración correcta
+          });
+
+          console.log('Filas CSV procesadas (filtradas):', csvRows.length);
+          console.log('Total de filas en CSV:', data.length);
+          console.log('Lotes válidos para validar:', lotesValidos);
+
+          // Ejecutar validaciones
+          const validationSummary = validarCsv(csvRows, {
+            fincaId: fincaId,
+            lotesValidos,
+          });
+
+          console.log('Resumen de validación:', validationSummary);
+
+          // Preparar datos para preview
+          const previewData = {
+            headers: headersEsperados,
+            rows: data.slice(0, 20).map((row) => ({
+              Lote: row.Lote,
+              Linea: row.Linea,
+              Palma: row.Palma,
+              Longitud: row.Longitud,
+              Latitud: row.Latitud,
+            })),
+            totalRows: data.length,
+          };
+
+          // Llamar callback con resumen de validación y preview
+          const validationData = validationSummary.isValid
+            ? { csvRows, fincaId: fincaId }
+            : undefined;
+
+          onValidationComplete(validationSummary, previewData, validationData);
+
+          if (validationSummary.isValid) {
+            toast.success('✅ Validación exitosa. El archivo está listo para ser descargado.');
+          } else {
+            toast.error(`Se encontraron ${validationSummary.totalErrors} error(es) en el archivo.`);
+          }
+
+          setIsValidating(false);
+        } catch (errorProceso: any) {
+          console.error('Error procesando CSV:', errorProceso);
+          toast.error(`Error al procesar el archivo: ${errorProceso.message || 'Error desconocido'}`);
+          setIsValidating(false);
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error('Error FileReader:', error);
+        toast.error('Error leyendo el archivo');
+        setIsValidating(false);
+      };
+      
+      reader.readAsText(selectedFile);
+    } catch (error: any) {
+      console.error('Error general:', error);
+      toast.error(`Error inesperado: ${error.message || 'Error desconocido'}`);
+      setIsValidating(false);
     }
   };
 
@@ -57,49 +210,50 @@ export const UploadForm = () => {
           Descargar plantilla CSV
         </Button>
       </div>
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#AA0F16] transition-colors">
-        <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        
-        <label htmlFor="file-upload" className="cursor-pointer">
-          <input
-            id="file-upload"
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+      <div className="grid gap-4">
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#AA0F16] transition-colors">
+          <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           
-          {selectedFile ? (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-              <p className="text-sm text-gray-500">
-                {(selectedFile.size / 1024).toFixed(2)} KB
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-900">
-                Selecciona un archivo CSV
-              </p>
-              <p className="text-sm text-gray-500">
-                Arrastra y suelta o haz clic para buscar
-              </p>
-            </div>
-          )}
-        </label>
+          <label htmlFor="file-upload" className="cursor-pointer">
+            <input
+              id="file-upload"
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            {selectedFile ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+                <p className="text-sm text-gray-500">
+                  {(selectedFile.size / 1024).toFixed(2)} KB
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-900">
+                  Selecciona un archivo CSV
+                </p>
+                <p className="text-sm text-gray-500">
+                  Arrastra y suelta o haz clic para buscar
+                </p>
+              </div>
+            )}
+          </label>
+        </div>
       </div>
 
       {selectedFile && (
         <Button
           type="submit"
           className="w-full bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
-          disabled={subirArchivo.isPending}
+          disabled={isValidating}
         >
-          <Upload className="mr-2 h-4 w-4" />
-          {subirArchivo.isPending ? 'Subiendo...' : 'Subir Archivo'}
+          <CheckCircle2 className="mr-2 h-4 w-4" />
+          {isValidating ? 'Validando...' : 'Validar archivo'}
         </Button>
       )}
     </form>
   );
 };
-

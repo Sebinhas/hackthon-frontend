@@ -1,180 +1,251 @@
-import { Usuario, UsuarioPayload } from '@/modules/dashboard/usuarios/types/usuarios.types';
-import { LoginCredentials, RegisterCredentials, AuthResponse } from '@/core/types/auth.types';
-import { CsvFile, CsvUploadResponse, CsvPreviewData } from '@/modules/uploadFile/types/uploadFile.types';
-import { mockUsuarios, mockAuthResponse, mockCsvFiles, mockCsvPreview } from './mockData';
+import { mockFincas, mockLotes, mockPlantas, mockLineas } from './mockData';
+import { Lote, Finca, Planta, LotePayload, Linea } from '@/modules/dashboard/mapa/types/lotes.types';
 
-// Simular delay de red
-const delay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Generar ID único
-const generateId = () => Math.random().toString(36).substr(2, 9);
-
-// Storage en memoria para los usuarios
-let usuarios = [...mockUsuarios];
+// Simular delay de red (reducido para mejor rendimiento)
+const delay = (ms: number = 100) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const mockService = {
-  // Auth
-  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
+  // Servicios para Fincas
+  obtenerFincas: async (): Promise<Finca[]> => {
     await delay();
-    
-    // Cualquier email/password funciona en modo mock
-    if (credentials.email && credentials.password) {
-      return mockAuthResponse;
-    }
-    
-    throw new Error('Credenciales inválidas');
+    // Usar mockFincas directamente con las fincas reales
+    return mockFincas;
   },
 
-  register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
+  obtenerFinca: async (id: number): Promise<Finca | undefined> => {
     await delay();
-    
-    // Simular registro exitoso
+    return mockFincas.find(f => f.key_value === id);
+  },
+
+  // Servicios para Lotes
+  obtenerLotes: async (): Promise<Lote[]> => {
+    await delay();
+    return mockLotes.map(lote => ({
+      ...lote,
+      id: lote.id_local,
+      coordenadas: lote.coordenadas_geojson.coordinates[0].map(coord => ({
+        lat: coord[1],
+        lng: coord[0]
+      })),
+      fecha_creacion: new Date(lote.metadatos.fecha_creacion),
+      fecha_ultima_modificacion: new Date(lote.metadatos.fecha_ultima_modificacion),
+      fecha_ultima_actividad: lote.actividades.ultima_fecha ? new Date(lote.actividades.ultima_fecha) : undefined,
+      proxima_actividad: lote.actividades.proxima,
+      cultivo_id: lote.cultivo.id,
+      cultivo_nombre: lote.cultivo.nombre,
+      tipo_suelo: lote.suelo.tipo as any,
+      ph_suelo: lote.suelo.ph,
+      topografia: lote.suelo.topografia as any,
+      sistema_riego: lote.infraestructura.sistema_riego as any,
+      tiene_cerca: lote.infraestructura.tiene_cerca,
+      tiene_sombra: lote.infraestructura.tiene_sombra,
+      acceso_vehicular: lote.infraestructura.acceso_vehicular,
+      notas: lote.metadatos.notas,
+      usuario_responsable_id: undefined,
+      imagenes: [],
+      documentos: []
+    }));
+  },
+
+  obtenerLote: async (id: string): Promise<Lote | undefined> => {
+    await delay();
+    const lote = mockLotes.find(l => l.id_local === id);
+    if (!lote) return undefined;
+
     return {
-      ...mockAuthResponse,
-      user: {
-        ...mockAuthResponse.user,
-        name: credentials.name,
-        email: credentials.email,
-      },
+      ...lote,
+      id: lote.id_local,
+      coordenadas: lote.coordenadas_geojson.coordinates[0].map(coord => ({
+        lat: coord[1],
+        lng: coord[0]
+      })),
+      fecha_creacion: new Date(lote.metadatos.fecha_creacion),
+      fecha_ultima_modificacion: new Date(lote.metadatos.fecha_ultima_modificacion),
+      fecha_ultima_actividad: lote.actividades.ultima_fecha ? new Date(lote.actividades.ultima_fecha) : undefined,
+      proxima_actividad: lote.actividades.proxima,
+      cultivo_id: lote.cultivo.id,
+      cultivo_nombre: lote.cultivo.nombre,
+      tipo_suelo: lote.suelo.tipo as any,
+      ph_suelo: lote.suelo.ph,
+      topografia: lote.suelo.topografia as any,
+      sistema_riego: lote.infraestructura.sistema_riego as any,
+      tiene_cerca: lote.infraestructura.tiene_cerca,
+      tiene_sombra: lote.infraestructura.tiene_sombra,
+      acceso_vehicular: lote.infraestructura.acceso_vehicular,
+      notas: lote.metadatos.notas,
+      usuario_responsable_id: undefined,
+      imagenes: [],
+      documentos: []
     };
   },
 
-  // Usuarios CRUD
-  obtenerUsuarios: async (): Promise<Usuario[]> => {
-    await delay(300);
-    return [...usuarios];
+  obtenerLotesPorFinca: async (fincaId: number): Promise<Lote[]> => {
+    await delay();
+    const lotes = mockLotes.filter(lote => lote.finca_id === fincaId);
+    return lotes
+      .filter(lote => lote.coordenadas_geojson.coordinates[0] && lote.coordenadas_geojson.coordinates[0].length > 0) // Solo lotes con coordenadas
+      .map(lote => ({
+        ...lote,
+        id: lote.id_local,
+        coordenadas: lote.coordenadas_geojson.coordinates[0].map(coord => ({
+          lat: coord[1],
+          lng: coord[0]
+        })),
+        fecha_creacion: new Date(lote.metadatos.fecha_creacion),
+        fecha_ultima_modificacion: new Date(lote.metadatos.fecha_ultima_modificacion),
+        fecha_ultima_actividad: lote.actividades.ultima_fecha ? new Date(lote.actividades.ultima_fecha) : undefined,
+        proxima_actividad: lote.actividades.proxima,
+        cultivo_id: lote.cultivo.id,
+        cultivo_nombre: lote.cultivo.nombre,
+        tipo_suelo: lote.suelo.tipo as any,
+        ph_suelo: lote.suelo.ph,
+        topografia: lote.suelo.topografia as any,
+        sistema_riego: lote.infraestructura.sistema_riego as any,
+        tiene_cerca: lote.infraestructura.tiene_cerca,
+        tiene_sombra: lote.infraestructura.tiene_sombra,
+        acceso_vehicular: lote.infraestructura.acceso_vehicular,
+        notas: lote.metadatos.notas,
+        usuario_responsable_id: undefined,
+        imagenes: [],
+        documentos: []
+      }));
   },
 
-  obtenerUsuario: async (id: string): Promise<Usuario> => {
-    await delay(300);
-    const usuario = usuarios.find(u => u.id === id);
-    
-    if (!usuario) {
-      throw new Error('Usuario no encontrado');
-    }
-    
-    return usuario;
-  },
-
-  crearUsuario: async (payload: UsuarioPayload): Promise<Usuario> => {
-    await delay(500);
-    
-    // Verificar si el email ya existe
-    if (usuarios.some(u => u.email === payload.email)) {
-      throw new Error('El email ya está en uso');
-    }
-    
-    const nuevoUsuario: Usuario = {
-      id: generateId(),
-      name: payload.name,
-      email: payload.email,
-      role: payload.role,
-      status: payload.status,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  crearLote: async (payload: LotePayload): Promise<Lote> => {
+    await delay();
+    const nuevoLote: Lote = {
+      id: Date.now().toString(),
+      codigo: payload.codigo,
+      nombre: payload.nombre,
+      descripcion: payload.descripcion,
+      finca_id: 2372, // Valor por defecto
+      coordenadas: payload.coordenadas,
+      area_hectareas: payload.area_hectareas,
+      perimetro_metros: payload.perimetro_metros,
+      altitud_msnm: payload.altitud_msnm,
+      cultivo_id: payload.cultivo_id,
+      cultivo_nombre: undefined,
+      estado: payload.estado,
+      fecha_ultima_actividad: undefined,
+      proxima_actividad: payload.notas,
+      tipo_suelo: payload.tipo_suelo,
+      ph_suelo: payload.ph_suelo,
+      topografia: payload.topografia,
+      sistema_riego: payload.sistema_riego,
+      tiene_cerca: payload.tiene_cerca,
+      tiene_sombra: payload.tiene_sombra,
+      acceso_vehicular: payload.acceso_vehicular,
+      fecha_creacion: new Date(),
+      fecha_ultima_modificacion: undefined,
+      usuario_responsable_id: undefined,
+      notas: payload.notas,
+      imagenes: [],
+      documentos: []
     };
-    
-    usuarios.push(nuevoUsuario);
-    return nuevoUsuario;
+    return nuevoLote;
   },
 
-  actualizarUsuario: async (id: string, payload: Partial<UsuarioPayload>): Promise<Usuario> => {
-    await delay(500);
-    
-    const index = usuarios.findIndex(u => u.id === id);
-    
-    if (index === -1) {
-      throw new Error('Usuario no encontrado');
-    }
-    
-    // Verificar email duplicado (si se está cambiando)
-    if (payload.email && payload.email !== usuarios[index].email) {
-      if (usuarios.some(u => u.email === payload.email && u.id !== id)) {
-        throw new Error('El email ya está en uso');
-      }
-    }
-    
-    usuarios[index] = {
-      ...usuarios[index],
+  actualizarLote: async (id: string, payload: Partial<LotePayload>): Promise<Lote> => {
+    await delay();
+    const loteExistente = await mockService.obtenerLote(id);
+    if (!loteExistente) throw new Error('Lote no encontrado');
+
+    const loteActualizado: Lote = {
+      ...loteExistente,
       ...payload,
-      updatedAt: new Date().toISOString(),
+      fecha_ultima_modificacion: new Date()
     };
-    
-    return usuarios[index];
+    return loteActualizado;
   },
 
-  eliminarUsuario: async (id: string): Promise<void> => {
-    await delay(400);
-    
-    const index = usuarios.findIndex(u => u.id === id);
-    
-    if (index === -1) {
-      throw new Error('Usuario no encontrado');
-    }
-    
-    usuarios.splice(index, 1);
+  eliminarLote: async (_id: string): Promise<void> => {
+    await delay();
+    // Simulación de eliminación
+    return;
   },
 
-  // Upload File CSV
-  subirArchivoCsv: async (file: File): Promise<CsvUploadResponse> => {
-    await delay(800);
-    
-    const nuevoArchivo: CsvFile = {
-      id: generateId(),
-      filename: file.name,
-      size: file.size,
-      uploadDate: new Date().toISOString(),
-      status: 'completed',
-      rowCount: Math.floor(Math.random() * 500) + 10,
-    };
-    
-    mockCsvFiles.push(nuevoArchivo);
-    
-    return {
-      id: nuevoArchivo.id,
-      filename: nuevoArchivo.filename,
-      status: nuevoArchivo.status,
-      message: 'Archivo subido exitosamente',
-    };
+  // Servicios para Plantas/Spots
+  obtenerPlantas: async (): Promise<Planta[]> => {
+    await delay();
+    return mockPlantas;
   },
 
-  obtenerArchivosCsv: async (): Promise<CsvFile[]> => {
-    await delay(300);
-    return [...mockCsvFiles];
+  obtenerPlantasPorLote: async (loteId: number): Promise<Planta[]> => {
+    await delay(100); // Reducir delay de 300ms a 100ms
+    
+    // Solo devolver spots reales del lote (sin generar spots imaginarios)
+    // Esto mejora significativamente el rendimiento
+    const spotsReales = mockPlantas.filter(planta => planta.lote_id === loteId);
+    
+    return spotsReales;
   },
 
-  obtenerArchivoCsv: async (id: string): Promise<CsvFile> => {
-    await delay(300);
-    const archivo = mockCsvFiles.find(f => f.id === id);
-    
-    if (!archivo) {
-      throw new Error('Archivo no encontrado');
-    }
-    
-    return archivo;
+  obtenerPlantasPorFinca: async (fincaId: number): Promise<Planta[]> => {
+    await delay();
+    return mockPlantas.filter(planta => planta.finca_id === fincaId);
   },
 
-  obtenerPreviewArchivo: async (id: string): Promise<CsvPreviewData> => {
-    await delay(400);
-    
-    // Simular preview de archivo
-    if (id) {
-      return mockCsvPreview;
-    }
-    
-    throw new Error('Archivo no encontrado');
+  obtenerPlanta: async (nombreSpot: string): Promise<Planta | undefined> => {
+    await delay();
+    return mockPlantas.find(planta => planta.nombre_spot === nombreSpot);
   },
 
-  eliminarArchivoCsv: async (id: string): Promise<void> => {
-    await delay(400);
-    
-    const index = mockCsvFiles.findIndex(f => f.id === id);
-    
-    if (index === -1) {
-      throw new Error('Archivo no encontrado');
-    }
-    
-    mockCsvFiles.splice(index, 1);
+  // Servicios para Líneas
+  obtenerLineas: async (): Promise<Linea[]> => {
+    await delay();
+    return mockLineas;
   },
+
+  obtenerLineasPorLote: async (loteId: number): Promise<Linea[]> => {
+    await delay();
+    
+    // Obtener todas las líneas únicas de los spots del lote
+    const spotsDelLote = mockPlantas.filter(planta => planta.lote_id === loteId);
+    const numerosLineaUnicos = [...new Set(spotsDelLote.map(spot => spot.linea))];
+    
+    // Crear un mapa de líneas por ID desde mockLineas
+    const lineasPorId = mockLineas.reduce((acc, linea) => {
+      // Verificar si esta línea tiene spots en el lote con el mismo número de línea
+      const tieneSpotsEnLote = spotsDelLote.some(spot => spot.linea === linea.id);
+      if (tieneSpotsEnLote) {
+        acc[linea.id] = linea;
+      }
+      return acc;
+    }, {} as Record<number, Linea>);
+    
+    // Para cada número de línea único, buscar o crear la línea
+    return numerosLineaUnicos.map(numeroLinea => {
+      // Buscar línea existente por ID coincidente
+      const lineaExistente = lineasPorId[numeroLinea];
+      
+      // Si existe, retornarla; si no, crear una línea genérica basada en los spots
+      if (lineaExistente) {
+        return lineaExistente;
+      }
+      
+      // Crear línea genérica a partir de los spots
+      const spotsDeEstaLinea = spotsDelLote
+        .filter(spot => spot.linea === numeroLinea)
+        .sort((a, b) => a.posicion - b.posicion);
+      
+      // Usar las coordenadas de los spots para crear la línea
+      const coordenadasLinea = spotsDeEstaLinea.map(spot => ({
+        lat: spot.lat,
+        lng: spot.lng
+      }));
+      
+      return {
+        id: numeroLinea, // Usar el número de línea como ID para mapeo
+        nombre: `Línea ${numeroLinea}`,
+        descripcion: `Línea ${numeroLinea} del lote`,
+        finca_id: spotsDeEstaLinea[0]?.finca_id || 0,
+        coordenadas: coordenadasLinea
+      };
+    });
+  },
+
+  obtenerLinea: async (id: number): Promise<Linea | undefined> => {
+    await delay();
+    return mockLineas.find(linea => linea.id === id);
+  }
 };
-

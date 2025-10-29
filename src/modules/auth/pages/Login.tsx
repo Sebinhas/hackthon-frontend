@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import AuthLayout from '@/shared/layout/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const { handleLogin, isLoading } = useLogin();
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -79,13 +81,27 @@ export default function Login() {
               <Lock className="h-4 w-4 text-neutral-500" />
               Contraseña
             </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              className="h-12 transition-all duration-200 focus:border-[#AA0F16] focus:ring-2 focus:ring-[#AA0F16]/20"
-              {...register('password')}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                className="h-12 pr-10 transition-all duration-200 focus:border-[#AA0F16] focus:ring-2 focus:ring-[#AA0F16]/20"
+                {...register('password')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors duration-200 focus:outline-none focus:text-[#AA0F16]"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -95,16 +111,6 @@ export default function Login() {
                 {errors.password.message}
               </motion.p>
             )}
-          </div>
-
-          {/* Olvidé mi contraseña */}
-          <div className="flex justify-end">
-            <Link
-              to="/auth/forgot-password"
-              className="text-sm text-[#AA0F16] hover:text-[#8B0C12] transition-colors duration-200"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
           </div>
 
           {/* Botón de envío */}

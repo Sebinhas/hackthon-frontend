@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import fondoAuth from '../../assets/auth/fondo_auth.webp';
-
+import logo from '@/assets/landing/Logo.png';
 interface AuthLayoutProps {
   children: ReactNode;
   isLogin?: boolean;
@@ -30,7 +30,7 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
         />
         
         {/* Overlay con gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#AA0F16]/90 to-[#8B0C12]/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#AA0F16]/100 to-[#8B0C12]/50" />
         
         {/* Contenido de bienvenida */}
         <div className="relative z-10 flex flex-col justify-center p-12 text-white">
@@ -40,16 +40,16 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
             transition={{ delay: 0.3, duration: 0.6 }}
           >
             <h1 className="text-4xl font-bold mb-4">
-              {isLoginPage ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}
+              {isLoginPage ? 'Agricultura de Precisión' : 'Comienza tu gestión agrícola'}
             </h1>
             <p className="text-lg opacity-95 mb-8">
               {isLoginPage
-                ? 'Accede a tu cuenta para continuar con tu trabajo'
-                : 'Únete a nosotros y comienza tu viaje hoy'}
+                ? 'Valida datos de cultivos, gestiona lotes y optimiza tus fincas con tecnología de precisión'
+                : 'Valida información de tus cultivos, gestiona coordenadas y realiza agricultura de precisión desde el primer día'}
             </p>
             <div className="flex items-center gap-2 text-sm opacity-90">
               <div className="h-1 w-12 bg-white rounded-full" />
-              <span>Seguro y confiable</span>
+              <span>Tecnología de precisión</span>
             </div>
           </motion.div>
         </div>
@@ -64,12 +64,12 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
           className="w-full max-w-md mx-auto"
         >
           {/* Logo y navegación */}
-          <div className="mb-10">
+          <div className="mb-10 px-12">
             <Link to="/" className="inline-flex items-center gap-2 group">
-              <div className="h-10 w-10 rounded-lg bg-[#AA0F16] flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-xl">P</span>
+              <div className="h-12 w-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                <img src={logo} alt="Logo" className="w-12 h-12" />
+                <span className="text-xl font-bold text-[#AA0F16]">AgroSyner</span>
               </div>
-              <span className="text-xl font-bold text-neutral-900">Plant Template</span>
             </Link>
           </div>
 
@@ -81,7 +81,7 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-sm text-neutral-600">
-              © 2024 Plant Template. Todos los derechos reservados.
+              © 2025 Juan's Devs. Todos los derechos reservados.
             </p>
           </div>
         </motion.div>
