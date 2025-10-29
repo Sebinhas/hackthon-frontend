@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const { user, clearAuth } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { startTour, shouldShowTour, stopTour } = useTour();
+  const { startTour, shouldShowTour } = useTour();
 
   // Establecer estado inicial basado en el tamaño de pantalla
   useEffect(() => {
@@ -311,11 +311,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
 
-      {/* Botón flotante de ayuda */}
+      {/* Botón flotante de ayuda - Solo visible en desktop */}
       <Button
         data-tour="tour-help-button"
         onClick={handleStartTour}
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-[#AA0F16] hover:bg-[#8B0C12] text-white shadow-lg hover:shadow-xl transition-all duration-200 z-40 flex items-center justify-center"
+        className="hidden lg:flex fixed bottom-6 right-6 h-12 w-12 rounded-full bg-[#AA0F16] hover:bg-[#8B0C12] text-white shadow-lg hover:shadow-xl transition-all duration-200 z-40 items-center justify-center"
         aria-label="Iniciar recorrido guiado"
       >
         <HelpCircle className="h-6 w-6" />
