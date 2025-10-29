@@ -5,6 +5,7 @@ import { DataTable } from '@/shared/components/DataTable';
 import { UploadForm } from '../components/UploadForm';
 import { CsvPreview } from '../components/CsvPreview';
 import { CsvInlinePreview } from '../components/CsvInlinePreview';
+import { ValidationSummary } from '../components/ValidationSummary';
 import { useUploadFilePage } from '../hooks/useUploadFile';
 
 export default function UploadFile() {
@@ -18,9 +19,10 @@ export default function UploadFile() {
     isDeleting,
     archivoAVer,
     handleClosePreview,
-    localPreviewData,
-    openLocalPreview,
-    closeLocalPreview,
+    validationSummary,
+    previewData,
+    handleValidationComplete,
+    clearValidation,
   } = useUploadFilePage();
 
   if (isLoading) {
@@ -34,7 +36,43 @@ export default function UploadFile() {
         <p className="text-muted-foreground">Carga archivos CSV y visualiza una previsualización de sus datos.</p>
       </div>
 
-      <UploadForm onPreviewReady={openLocalPreview} />
+      <UploadForm onValidationComplete={handleValidationComplete} />
+
+      {/* Mostrar resumen de validación si existe */}
+      {validationSummary && previewData && (
+        <Dialog open={!!validationSummary} onOpenChange={clearValidation}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Resultado de Validación</DialogTitle>
+              <DialogDescription>
+                Revisa el resumen de validación del archivo CSV
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <ValidationSummary summary={validationSummary} onClose={clearValidation} />
+              
+              {previewData && (
+                <div className="mt-4">
+                  <h3 className="font-semibold mb-2">Previsualización del archivo</h3>
+                  <CsvInlinePreview data={previewData} />
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={clearValidation}>
+                Cerrar
+              </Button>
+              {validationSummary.isValid && (
+                <Button className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white">
+                  Proceder con la subida (próximamente)
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <DataTable
         data={archivos}
@@ -73,20 +111,6 @@ export default function UploadFile() {
           {archivoAVer && <CsvPreview fileId={archivoAVer} />}
         </DialogContent>
       </Dialog>
-
-      <Dialog open={!!localPreviewData} onOpenChange={closeLocalPreview}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Previsualización (validación local)</DialogTitle>
-            <DialogDescription>
-              Vista previa básica del archivo seleccionado
-            </DialogDescription>
-          </DialogHeader>
-          {localPreviewData && <CsvInlinePreview data={localPreviewData} />}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
-
-

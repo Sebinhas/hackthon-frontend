@@ -1,9 +1,9 @@
 import { api } from '@/core/api/useConfigApi';
 import { mockService } from '@/shared/mocks/mockService';
-import { CsvFile, CsvUploadResponse, CsvPreviewData, Finca } from '../types/uploadFile.types';
+import { CsvFile, CsvUploadResponse, CsvPreviewData, Finca, FincasResponse } from '../types/uploadFile.types';
 
 // Cambiar a true para usar datos mockeados
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export const uploadFileService = {
   subirArchivoCsv: async (file: File, fincaId?: number): Promise<CsvUploadResponse> => {
@@ -86,11 +86,35 @@ export const uploadFileService = {
     }
 
     try {
-      const response = await api.get<Finca[]>('/fincas');
+      const response = await api.get<FincasResponse>('/fincas');
+      
+      // El backend devuelve { status, message, data: Finca[] }
+      if (response.data.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      
+      // Fallback si la estructura es diferente
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      
+      throw new Error('Formato de respuesta de fincas inválido');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Error al obtener fincas';
+      throw new Error(errorMessage);
+    }
+  },
+
+  obtenerLotesValidosPorFinca: async (fincaId: number): Promise<string[]> => {
+    if (USE_MOCK) {
+      return mockService.obtenerLotesValidosPorFinca(fincaId);
+    }
+
+    try {
+      const response = await api.get<string[]>(`/fincas/${fincaId}/lotes-validos`);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener fincas');
+      throw new Error(error.response?.data?.message || 'Error al obtener lotes válidos');
     }
   },
 };
-
