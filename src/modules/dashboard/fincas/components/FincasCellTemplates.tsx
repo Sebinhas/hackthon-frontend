@@ -10,15 +10,15 @@ export const MonedaCell = ({ moneda }: { moneda: string }) => (
   <span className="font-medium text-neutral-700">{moneda}</span>
 );
 
-export const PagoDiaCell = ({ pago_dia }: { pago_dia: number }) => (
+export const PagoDiaCell = ({ pagoDia }: { pagoDia: number }) => (
   <div className="text-right">
-    <span className="font-semibold">${pago_dia.toLocaleString('es-CO')}</span>
+    <span className="font-semibold">${pagoDia.toLocaleString('es-CO')}</span>
   </div>
 );
 
-export const KeyValueCell = ({ key_value }: { key_value: number }) => (
+export const KeyValueCell = ({ keyValue }: { keyValue: number }) => (
   <div className="text-center">
-    <Badge variant="secondary">{key_value}</Badge>
+    <Badge variant="secondary">{keyValue}</Badge>
   </div>
 );
 

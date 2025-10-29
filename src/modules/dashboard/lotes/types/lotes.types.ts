@@ -1,19 +1,18 @@
-export interface Finca {
+export interface Lote {
   id: string;
   key: string;
   grupo: string;
   sigla: string;
-  moneda: string;
   nombre: string;
-  pagoDia: number;
+  fincaId: number;
   keyValue: number;
   tipoSujetoId: number;
   tipoCultivoId: number;
 }
 
-export interface FincasResponse {
+export interface LotesResponse {
   status: number;
   message: string;
-  data: Finca[];
+  data: Lote[];
 }
 
