@@ -1,6 +1,4 @@
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { DataTable } from '@/shared/components/DataTable';
 import { useFincasPage } from '../hooks/useFincas';
@@ -17,6 +15,11 @@ export default function Fincas() {
   const { fincas, isLoading } = useFincasPage();
 
   const columns = [
+    {
+      key: 'id',
+      header: 'ID',
+      render: (finca: Finca) => <span className="font-mono text-sm">{finca.id}</span>,
+    },
     {
       key: 'key',
       header: 'Key',
@@ -43,14 +46,24 @@ export default function Fincas() {
       render: (finca: Finca) => MonedaCell({ moneda: finca.moneda }),
     },
     {
-      key: 'pago_dia',
+      key: 'pagoDia',
       header: 'Pago Día',
-      render: (finca: Finca) => PagoDiaCell({ pago_dia: finca.pago_dia }),
+      render: (finca: Finca) => PagoDiaCell({ pagoDia: finca.pagoDia }),
     },
     {
-      key: 'key_value',
+      key: 'keyValue',
       header: 'Key Value',
-      render: (finca: Finca) => KeyValueCell({ key_value: finca.key_value }),
+      render: (finca: Finca) => KeyValueCell({ keyValue: finca.keyValue }),
+    },
+    {
+      key: 'tipoSujetoId',
+      header: 'Tipo Sujeto',
+      render: (finca: Finca) => <span className="text-muted-foreground">{finca.tipoSujetoId}</span>,
+    },
+    {
+      key: 'tipoCultivoId',
+      header: 'Tipo Cultivo',
+      render: (finca: Finca) => <span className="text-muted-foreground">{finca.tipoCultivoId}</span>,
     },
   ];
 
@@ -67,26 +80,21 @@ export default function Fincas() {
     >
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3 invånare font-bold">Fincas</h1>
+          <h1 className="text-3xl font-bold">Fincas</h1>
           <p className="text-muted-foreground mt-1">
-            Gestiona las fincas del sistema
+            Visualiza las fincas del sistema
           </p>
         </div>
-        <Button>
-          <Plus className="w-5 h-5 mr-2" />
-          Nueva Finca
-        </Button>
       </div>
 
       <DataTable
         data={fincas}
         columns={columns}
-        filterPlaceholder="Buscar finca..."
+        filterPlaceholder="Buscar finca por nombre..."
         filterKey="nombre"
-        pageSizeOptions={[5, 10, 15]}
+        pageSizeOptions={[5, 10, 15, 20]}
         defaultPageSize={10}
       />
     </motion.div>
   );
 }
-

@@ -11,6 +11,7 @@ import CreateUsuarios from '@/modules/dashboard/usuarios/pages/CreateUsuarios';
 import EditUsuarios from '@/modules/dashboard/usuarios/pages/EditUsuarios';
 import Mapa from '@/modules/dashboard/mapa/pages/Lotes';
 import Fincas from '@/modules/dashboard/fincas/pages/Fincas';
+import Lotes from '@/modules/dashboard/lotes/pages/Lotes';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import UploadFile from '@/modules/uploadFile/pages/UploadFile';
@@ -60,6 +61,9 @@ export default function AppRoutes() {
 
         {/* Fincas */}
         <Route path="fincas" element={<Fincas />} />
+
+        {/* Lotes */}
+        <Route path="lotes" element={<Lotes />} />
 
         {/* Upload CSV */}
         <Route path="upload-file" element={<UploadFile />} />
