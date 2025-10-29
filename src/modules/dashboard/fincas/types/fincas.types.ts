@@ -1,32 +1,19 @@
 export interface Finca {
-  finca_id?: number;
+  id: string;
   key: string;
   grupo: string;
   sigla: string;
   moneda: string;
   nombre: string;
-  pago_dia: number;
-  key_value: number;
-  tipo_sujeto_id: number;
-  tipo_cultivo_id: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface FincaPayload {
-  key: string;
-  grupo: string;
-  sigla: string;
-  moneda: string;
-  nombre: string;
-  pago_dia: number;
-  key_value: number;
-  tipo_sujeto_id: number;
-  tipo_cultivo_id: number;
+  pagoDia: number;
+  keyValue: number;
+  tipoSujetoId: number;
+  tipoCultivoId: number;
 }
 
 export interface FincasResponse {
+  status: number;
+  message: string;
   data: Finca[];
-  total: number;
 }
 

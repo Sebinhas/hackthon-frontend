@@ -62,7 +62,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
 
     try {
       // Obtener lotes válidos para la finca
-      const lotesValidos = await uploadFileService.obtenerLotesValidosPorFinca(selectedFincaId);
+      //const lotesValidos = await uploadFileService.obtenerLotesValidosPorFinca(selectedFincaId);
 
       // Parsear CSV con papaparse usando FileReader
       const reader = new FileReader();
