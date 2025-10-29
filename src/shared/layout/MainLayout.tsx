@@ -25,6 +25,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-2">
               <img src={logo} alt="Logo" className="w-10 h-10" />
+              <span className="text-xl font-bold text-[#AA0F16]">
+              AgroSyner
+              </span>
             </Link>
 
             <div className="flex items-center gap-4">

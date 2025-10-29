@@ -64,10 +64,11 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
           className="w-full max-w-md mx-auto"
         >
           {/* Logo y navegación */}
-          <div className="mb-10">
+          <div className="mb-10 px-12">
             <Link to="/" className="inline-flex items-center gap-2 group">
-              <div className="h-10 w-10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <img src={logo} alt="Logo" className="w-10 h-10" />
+              <div className="h-12 w-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                <img src={logo} alt="Logo" className="w-12 h-12" />
+                <span className="text-xl font-bold text-[#AA0F16]">AgroSyner</span>
               </div>
             </Link>
           </div>
