@@ -1,85 +1,45 @@
-// Script temporal para generar CSV con spots dentro del lote 34056
+// Script para generar CSV con spots dentro del lote 34055
+// INCLUYE ERRORES INTENCIONALES para probar la validación
 import fs from 'fs';
 
 const coordenadasPerimetro = [
-  { lat: 3.721866, lng: -73.197251 },
-  { lat: 3.721917, lng: -73.197066 },
-  { lat: 3.722057, lng: -73.196485 },
-  { lat: 3.722259, lng: -73.195641 },
-  { lat: 3.722243, lng: -73.195553 },
-  { lat: 3.722128, lng: -73.195441 },
-  { lat: 3.722072, lng: -73.195417 },
-  { lat: 3.721882, lng: -73.195323 },
-  { lat: 3.721637, lng: -73.195210 },
-  { lat: 3.721445, lng: -73.195112 },
-  { lat: 3.721251, lng: -73.195026 },
-  { lat: 3.721106, lng: -73.194950 },
-  { lat: 3.720895, lng: -73.194843 },
-  { lat: 3.720759, lng: -73.194828 },
-  { lat: 3.720673, lng: -73.194769 },
-  { lat: 3.720626, lng: -73.194732 },
-  { lat: 3.720578, lng: -73.194693 },
-  { lat: 3.720499, lng: -73.194647 },
-  { lat: 3.720267, lng: -73.194523 },
-  { lat: 3.720131, lng: -73.194456 },
-  { lat: 3.719966, lng: -73.194435 },
-  { lat: 3.719801, lng: -73.194516 },
-  { lat: 3.719574, lng: -73.194625 },
-  { lat: 3.719430, lng: -73.194699 },
-  { lat: 3.719318, lng: -73.194768 },
-  { lat: 3.719318, lng: -73.194899 },
-  { lat: 3.719261, lng: -73.194977 },
-  { lat: 3.719164, lng: -73.195030 },
-  { lat: 3.718960, lng: -73.195123 },
-  { lat: 3.718805, lng: -73.195203 },
-  { lat: 3.718752, lng: -73.195318 },
-  { lat: 3.718663, lng: -73.195476 },
-  { lat: 3.718563, lng: -73.195528 },
-  { lat: 3.718429, lng: -73.195590 },
-  { lat: 3.718300, lng: -73.195669 },
-  { lat: 3.718133, lng: -73.195746 },
-  { lat: 3.717985, lng: -73.195822 },
-  { lat: 3.717871, lng: -73.195924 },
-  { lat: 3.717703, lng: -73.196056 },
-  { lat: 3.717550, lng: -73.196119 },
-  { lat: 3.717414, lng: -73.196205 },
-  { lat: 3.717343, lng: -73.196290 },
-  { lat: 3.717194, lng: -73.196481 },
-  { lat: 3.717156, lng: -73.196551 },
-  { lat: 3.717162, lng: -73.196660 },
-  { lat: 3.717178, lng: -73.196720 },
-  { lat: 3.717237, lng: -73.196797 },
-  { lat: 3.717293, lng: -73.196792 },
-  { lat: 3.717469, lng: -73.196805 },
-  { lat: 3.717633, lng: -73.196816 },
-  { lat: 3.717754, lng: -73.196891 },
-  { lat: 3.717812, lng: -73.196904 },
-  { lat: 3.717851, lng: -73.196933 },
-  { lat: 3.717898, lng: -73.197006 },
-  { lat: 3.717927, lng: -73.197072 },
-  { lat: 3.717939, lng: -73.197161 },
-  { lat: 3.717912, lng: -73.197231 },
-  { lat: 3.717875, lng: -73.197287 },
-  { lat: 3.717842, lng: -73.197339 },
-  { lat: 3.717765, lng: -73.197442 },
-  { lat: 3.717736, lng: -73.197519 },
-  { lat: 3.717746, lng: -73.197574 },
-  { lat: 3.717727, lng: -73.197639 },
-  { lat: 3.717746, lng: -73.197696 },
-  { lat: 3.717784, lng: -73.197804 },
-  { lat: 3.717790, lng: -73.197931 },
-  { lat: 3.717823, lng: -73.198026 },
-  { lat: 3.717813, lng: -73.198151 },
-  { lat: 3.717790, lng: -73.198293 },
-  { lat: 3.717830, lng: -73.198318 },
-  { lat: 3.718149, lng: -73.197845 },
-  { lat: 3.718488, lng: -73.197352 },
-  { lat: 3.718701, lng: -73.197020 },
-  { lat: 3.718813, lng: -73.197026 },
-  { lat: 3.719567, lng: -73.197078 },
-  { lat: 3.720200, lng: -73.197125 },
-  { lat: 3.720840, lng: -73.197166 },
-  { lat: 3.721866, lng: -73.197251 }
+  { lat: 3.717828, lng: -73.198359 },
+  { lat: 3.717829, lng: -73.198363 },
+  { lat: 3.717828, lng: -73.198463 },
+  { lat: 3.717732, lng: -73.198622 },
+  { lat: 3.717580, lng: -73.198811 },
+  { lat: 3.717501, lng: -73.198860 },
+  { lat: 3.717307, lng: -73.199094 },
+  { lat: 3.717240, lng: -73.199218 },
+  { lat: 3.717165, lng: -73.199442 },
+  { lat: 3.717057, lng: -73.199650 },
+  { lat: 3.717374, lng: -73.199679 },
+  { lat: 3.717847, lng: -73.199710 },
+  { lat: 3.718177, lng: -73.199749 },
+  { lat: 3.718675, lng: -73.199776 },
+  { lat: 3.718788, lng: -73.199837 },
+  { lat: 3.718949, lng: -73.199854 },
+  { lat: 3.719373, lng: -73.199873 },
+  { lat: 3.719866, lng: -73.199912 },
+  { lat: 3.720352, lng: -73.199958 },
+  { lat: 3.721158, lng: -73.200019 },
+  { lat: 3.721186, lng: -73.199916 },
+  { lat: 3.721271, lng: -73.199581 },
+  { lat: 3.721330, lng: -73.199321 },
+  { lat: 3.721383, lng: -73.199116 },
+  { lat: 3.721434, lng: -73.198910 },
+  { lat: 3.721485, lng: -73.198738 },
+  { lat: 3.721557, lng: -73.198471 },
+  { lat: 3.721612, lng: -73.198259 },
+  { lat: 3.721680, lng: -73.197921 },
+  { lat: 3.721772, lng: -73.197533 },
+  { lat: 3.721860, lng: -73.197271 },
+  { lat: 3.721424, lng: -73.197234 },
+  { lat: 3.720809, lng: -73.197183 },
+  { lat: 3.720147, lng: -73.197144 },
+  { lat: 3.719416, lng: -73.197089 },
+  { lat: 3.718731, lng: -73.197049 },
+  { lat: 3.717828, lng: -73.198359 }
 ];
 
 // Función para verificar si un punto está dentro del polígono (Ray Casting Algorithm)
@@ -117,16 +77,16 @@ function calcularLimites(coordenadas) {
 
 // Generar spots dentro del polígono
 const limites = calcularLimites(coordenadasPerimetro);
-const loteNombre = '34056'; // Usar el ID del lote como nombre
+const loteNombre = '34055';
 const spots = [];
-const separacion = 0.0004; // Aproximadamente 45 metros entre puntos
+const separacion = 0.00025; // Aproximadamente 28 metros entre puntos (más denso)
 
 let linea = 1;
 let latActual = limites.minLat;
 
 while (latActual < limites.maxLat) {
   let lngActual = limites.minLng;
-  let palma = 1; // Posición en la línea (se reinicia por cada línea)
+  let palma = 1;
   let tieneSpotsEnLinea = false;
   
   // Recorrer horizontalmente (por longitud)
@@ -148,13 +108,107 @@ while (latActual < limites.maxLat) {
     lngActual += separacion;
   }
   
-  // Solo incrementar línea si encontró spots en esta fila
   if (tieneSpotsEnLinea) {
     linea++;
   }
   
   latActual += separacion;
 }
+
+console.log(`Generados ${spots.length} spots válidos`);
+
+// ===== AGREGAR ERRORES INTENCIONALES PARA PROBAR VALIDACIÓN =====
+
+// 1. Coordenadas duplicadas (mismo lat/lng exacto)
+if (spots.length > 2) {
+  // Duplicar el spot en índice 5
+  const spotDuplicado = { ...spots[5] };
+  spots.push(spotDuplicado);
+  console.log('✅ Error agregado: Coordenada duplicada');
+}
+
+// 2. Combinación Línea+Palma duplicada dentro del mismo lote
+if (spots.length > 3) {
+  // Crear un spot con la misma línea y palma que el primero
+  const primerSpot = spots[0];
+  const spotDuplicadoLineaPalma = {
+    lote: primerSpot.lote,
+    linea: primerSpot.linea,
+    palma: primerSpot.palma,
+    longitud: (parseFloat(primerSpot.longitud) + 0.0001).toFixed(12),
+    latitud: (parseFloat(primerSpot.latitud) + 0.0001).toFixed(12)
+  };
+  spots.push(spotDuplicadoLineaPalma);
+  console.log('✅ Error agregado: Línea+Palma duplicada en el mismo lote');
+}
+
+// 3. Formato de coordenadas incorrecto (usar coma en lugar de punto)
+if (spots.length > 5) {
+  const spotFormatoIncorrecto = {
+    lote: loteNombre,
+    linea: '99',
+    palma: '99',
+    longitud: '-73,198359', // Error: coma en lugar de punto
+    latitud: '3,717828'     // Error: coma en lugar de punto
+  };
+  spots.push(spotFormatoIncorrecto);
+  console.log('✅ Error agregado: Formato de coordenadas incorrecto (coma en lugar de punto)');
+}
+
+// 4. Coordenadas fuera del polígono (pero con formato válido)
+const coordenadaFuera = {
+  lote: loteNombre,
+  linea: '100',
+  palma: '1',
+  longitud: (limites.minLng - 0.01).toFixed(12), // Fuera del polígono
+  latitud: (limites.minLat - 0.01).toFixed(12)   // Fuera del polígono
+};
+spots.push(coordenadaFuera);
+console.log('✅ Error agregado: Coordenada fuera del polígono (pero formato válido)');
+
+// 5. Otro lote inválido (lote que no pertenece a la finca)
+const spotLoteInvalido = {
+  lote: '99999', // Lote que no existe
+  linea: '1',
+  palma: '1',
+  longitud: (limites.minLng + 0.001).toFixed(12),
+  latitud: (limites.minLat + 0.001).toFixed(12)
+};
+spots.push(spotLoteInvalido);
+console.log('✅ Error agregado: Lote inválido (no pertenece a la finca)');
+
+// 6. Más coordenadas duplicadas (múltiples)
+if (spots.length > 8) {
+  const spotOriginal = spots[10];
+  for (let i = 0; i < 2; i++) {
+    spots.push({ ...spotOriginal });
+  }
+  console.log('✅ Error agregado: Múltiples coordenadas duplicadas');
+}
+
+// 7. Valores vacíos o inválidos
+spots.push({
+  lote: loteNombre,
+  linea: '',
+  palma: '1',
+  longitud: (limites.minLng + 0.001).toFixed(12),
+  latitud: (limites.minLat + 0.001).toFixed(12)
+});
+console.log('✅ Error agregado: Valor vacío (línea vacía)');
+
+// 8. Coordenadas con formato muy largo (más decimales de los esperados)
+spots.push({
+  lote: loteNombre,
+  linea: '101',
+  palma: '1',
+  longitud: (limites.minLng + 0.002).toFixed(20), // Muchos decimales
+  latitud: (limites.minLat + 0.002).toFixed(20)
+});
+console.log('✅ Spot agregado: Coordenadas con muchos decimales (debería ser válido)');
+
+console.log(`\n📊 Total de spots generados: ${spots.length}`);
+console.log(`   - Spots válidos: ~${spots.length - 10}`);
+console.log(`   - Spots con errores: ~10\n`);
 
 // Generar CSV
 const csvHeader = 'Lote,Linea,Palma,Longitud,Latitud\n';
@@ -165,8 +219,15 @@ const csvRows = spots.map(s =>
 const csvContent = '\uFEFF' + csvHeader + csvRows;
 
 // Escribir archivo
-fs.writeFileSync('lote_34056_spots.csv', csvContent, 'utf8');
+fs.writeFileSync('lote_34055_spots_con_errores.csv', csvContent, 'utf8');
 
-console.log(`✅ CSV generado con ${spots.length} spots`);
-console.log(`📁 Archivo: lote_34056_spots.csv`);
-
+console.log('✅ CSV generado con errores de prueba');
+console.log('📁 Archivo: lote_34055_spots_con_errores.csv');
+console.log('\n⚠️  Este archivo contiene errores intencionales para probar la validación:');
+console.log('   1. Coordenadas duplicadas');
+console.log('   2. Línea+Palma duplicada en mismo lote');
+console.log('   3. Formato incorrecto (coma en lugar de punto)');
+console.log('   4. Coordenadas fuera del polígono');
+console.log('   5. Lote inválido');
+console.log('   6. Valores vacíos');
+console.log('   7. Múltiples duplicados');
