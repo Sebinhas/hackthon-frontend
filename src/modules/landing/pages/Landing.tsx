@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Building2, Layers, MapPin, Users, Upload, Shield, Zap, BarChart3 } from 'lucide-react';
 import MainLayout from '@/shared/layout/MainLayout';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/landing/Logo.png';
 import { Card, CardContent } from '@/components/ui/card';
 
 const fadeInUp = {
