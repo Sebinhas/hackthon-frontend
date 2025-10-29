@@ -9,6 +9,7 @@ import DashboardHome from '@/modules/dashboard/home/pages/Home';
 import Usuarios from '@/modules/dashboard/usuarios/pages/Usuarios';
 import CreateUsuarios from '@/modules/dashboard/usuarios/pages/CreateUsuarios';
 import EditUsuarios from '@/modules/dashboard/usuarios/pages/EditUsuarios';
+import Mapa from '@/modules/dashboard/mapa/pages/Lotes';
 import Fincas from '@/modules/dashboard/fincas/pages/Fincas';
 import Lotes from '@/modules/dashboard/lotes/pages/Lotes';
 import ProtectedRoute from './ProtectedRoute';
@@ -66,6 +67,9 @@ export default function AppRoutes() {
 
         {/* Upload CSV */}
         <Route path="upload-file" element={<UploadFile />} />
+        
+        {/* Mapa */}
+        <Route path="mapa" element={<Mapa />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

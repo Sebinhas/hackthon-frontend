@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Home, Users, Upload, ChevronDown, User as UserIcon, Building, Layers } from 'lucide-react';
+import { LogOut, Menu, X, Home, Users, Upload, ChevronDown, User as UserIcon, Building, MapPin } from 'lucide-react';
 import { useAuthStore } from '@/core/store/authStore';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +31,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Home, label: 'Inicio', path: '/dashboard/home' },
     { icon: Users, label: 'Usuarios', path: '/dashboard/usuarios' },
     { icon: Building, label: 'Fincas', path: '/dashboard/fincas' },
-    { icon: Layers, label: 'Lotes', path: '/dashboard/lotes' },
+    { icon: MapPin, label: 'Mapa', path: '/dashboard/mapa' },
     { icon: Upload, label: 'Subir CSV', path: '/dashboard/upload-file' },
   ];
 

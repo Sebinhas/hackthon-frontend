@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { uploadFileService } from '../services/uploadFile.service';
-import { CsvFile, Finca } from '../types/uploadFile.types';
+import { CsvFile, Finca, CsvPreviewData } from '../types/uploadFile.types';
 import { FileCell, StatusCell, RowCountCell, ActionsCell } from '../components/UploadFileCellTemplates';
 
 // Hooks React Query Base
@@ -74,6 +74,7 @@ export const useUploadFilePage = () => {
   const [archivoAEliminar, setArchivoAEliminar] = useState<string | null>(null);
   const [archivoAVer, setArchivoAVer] = useState<string | null>(null);
   const [selectedFincaId, setSelectedFincaId] = useState<number | null>(null);
+  const [localPreviewData, setLocalPreviewData] = useState<CsvPreviewData | null>(null);
 
   const handleDeleteConfirm = () => {
     if (archivoAEliminar) {
@@ -88,6 +89,14 @@ export const useUploadFilePage = () => {
 
   const handleClosePreview = () => {
     setArchivoAVer(null);
+  };
+
+  const openLocalPreview = (data: CsvPreviewData) => {
+    setLocalPreviewData(data);
+  };
+
+  const closeLocalPreview = () => {
+    setLocalPreviewData(null);
   };
 
   const columns = [
@@ -132,6 +141,9 @@ export const useUploadFilePage = () => {
     handleClosePreview,
     selectedFincaId,
     setSelectedFincaId,
+    localPreviewData,
+    openLocalPreview,
+    closeLocalPreview,
   };
 };
 
