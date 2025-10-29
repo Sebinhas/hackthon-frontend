@@ -33,6 +33,7 @@ export interface CsvValidationResult {
 }
 
 export interface Finca {
+  id?: string;
   key: string;
   grupo: string;
   sigla: string;
@@ -44,3 +45,38 @@ export interface Finca {
   tipoCultivoId: number;
 }
 
+export interface FincasResponse {
+  status: number;
+  message: string;
+  data: Finca[];
+}
+
+export interface ValidationError {
+  type: 'error' | 'warning';
+  message: string;
+  affectedRows: number[];
+  detail?: string;
+}
+
+export interface ValidationSummary {
+  isValid: boolean;
+  totalErrors: number;
+  totalWarnings: number;
+  errors: ValidationError[];
+  warnings: ValidationError[];
+}
+
+export interface CsvRow {
+  rowNumber: number;
+  Lote: string;
+  Linea: string;
+  Palma: string;
+  Logitud: string;
+  Latitud: string;
+  [key: string]: string | number;
+}
+
+export interface ValidationCompleteData {
+  csvRows: CsvRow[];
+  fincaId: number;
+}
