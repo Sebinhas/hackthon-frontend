@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { Planta } from '../types/lotes.types';
+import { Linea, Planta } from '../types/lotes.types';
 
 interface SpotsRendererProps {
   map: google.maps.Map | null;
   spots: Planta[];
   mostrarLineas?: boolean;
   mostrarPoligonos?: boolean;
+  lineas: Linea[];
 }
 
 export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
@@ -13,6 +14,7 @@ export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
   spots,
   mostrarLineas = true,
   mostrarPoligonos = true,
+  lineas,
 }) => {
   const polygonsRef = useRef<google.maps.Polygon[]>([]);
   const linesRef = useRef<google.maps.Polyline[]>([]);
@@ -41,9 +43,16 @@ export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
       return acc;
     }, {} as Record<number, Planta[]>);
 
+    // Crear mapa de líneas por ID para búsqueda rápida
+    const lineasPorId = lineas.reduce((acc, linea) => {
+      acc[linea.id] = linea;
+      return acc;
+    }, {} as Record<number, Linea>);
+
     // Renderizar cada línea
     Object.entries(spotsPorLinea).forEach(([lineaStr, spotsLinea]) => {
       const numeroLinea = parseInt(lineaStr, 10);
+      const lineaInfo = lineasPorId[numeroLinea]; // Buscar información de la línea
       
       // Ordenar spots por posición
       const spotsOrdenados = spotsLinea.sort((a, b) => a.posicion - b.posicion);
@@ -89,6 +98,7 @@ export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
           });
 
           hexagon.addListener('click', () => {
+            
             infoWindowsRef.current.forEach((iw) => iw.close());
             infoWindow.open(map, marker);
           });
@@ -99,7 +109,8 @@ export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
       }
 
       // Crear línea conectando los spots de esta línea
-      if (mostrarLineas && spotsOrdenados.length > 1) {
+      // IMPORTANTE: Solo mostrar líneas si NO hay polígonos visibles para evitar conflictos de clicks
+      if (mostrarLineas && !mostrarPoligonos && spotsOrdenados.length > 1) {
         const linePath = spotsOrdenados.map(spot => ({
           lat: spot.lat,
           lng: spot.lng,
@@ -115,13 +126,21 @@ export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
           clickable: true,
         });
 
-        // InfoWindow para la línea
+        // InfoWindow para la línea con nombre desde mock
+        const nombreLinea = lineaInfo?.nombre || `Línea ${numeroLinea}`;
+        const descripcionLinea = lineaInfo?.descripcion || '';
+        
         const lineaInfoWindow = new google.maps.InfoWindow({
           content: `
-            <div style="padding: 10px; font-size: 13px; text-align: center; min-width: 120px;">
+            <div style="padding: 10px; font-size: 13px; text-align: center; min-width: 150px;">
               <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: #2563eb;">
-                Línea ${numeroLinea}
+                ${nombreLinea}
               </div>
+              ${descripcionLinea ? `
+                <div style="color: #666; font-size: 11px; margin-bottom: 4px;">
+                  ${descripcionLinea}
+                </div>
+              ` : ''}
               <div style="color: #666; font-size: 11px;">
                 ${spotsOrdenados.length} spot${spotsOrdenados.length !== 1 ? 's' : ''}
               </div>
@@ -161,7 +180,7 @@ export const SpotsRenderer: React.FC<SpotsRendererProps> = ({
       markersRef.current.forEach((marker) => marker.setMap(null));
       infoWindowsRef.current.forEach((iw) => iw.close());
     };
-  }, [map, spots, mostrarLineas, mostrarPoligonos]);
+  }, [map, spots, mostrarLineas, mostrarPoligonos, lineas]);
 
   return null; // Este componente no renderiza nada en el DOM
 };

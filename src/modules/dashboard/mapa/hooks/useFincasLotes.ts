@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { mockService } from '@/shared/mocks/mockService';
-import { Finca, Lote } from '../types/lotes.types';
+import { Finca, Lote, Linea } from '../types/lotes.types';
 
 // Hook para obtener todas las fincas
 export const useObtenerFincas = () => {
@@ -38,5 +38,15 @@ export const useObtenerPlantasPorFinca = (fincaId: number | null) => {
     queryFn: () => fincaId ? mockService.obtenerPlantasPorFinca(fincaId) : Promise.resolve([]),
     enabled: !!fincaId,
     staleTime: 2 * 60 * 1000,
+  });
+};
+
+// Hook para obtener líneas por lote
+export const useObtenerLineasPorLote = (loteId: string | null) => {
+  return useQuery({
+    queryKey: ['lineas', 'lote', loteId],
+    queryFn: () => loteId ? mockService.obtenerLineasPorLote(parseInt(loteId)) : Promise.resolve([]),
+    enabled: !!loteId,
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
