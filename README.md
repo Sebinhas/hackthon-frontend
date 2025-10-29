@@ -1,6 +1,6 @@
-# 🌱 Plantizador - Sistema de Gestión de Fincas y Lotes
+# 🌱 AgroSyner - Sistema de Gestión Agrícola de Precisión
 
-Sistema moderno para la gestión de fincas, lotes, plantas y spots con visualización en mapas interactivos usando Google Maps API.
+Sistema completo y moderno para la gestión de fincas, lotes y plantas con visualización en mapas interactivos, validación avanzada de datos CSV y agricultura de precisión mediante Google Maps API.
 
 ## 📋 Tabla de Contenidos
 
@@ -17,18 +17,25 @@ Sistema moderno para la gestión de fincas, lotes, plantas y spots con visualiza
 - [Variables de Entorno](#-variables-de-entorno)
 - [Recursos](#-recursos)
 
-## ✨ Características
+## ✨ Características Principales
 
-- 🗺️ **Visualización de Mapas** - Integración completa con Google Maps API
-- 📊 **Gestión de Fincas y Lotes** - CRUD completo para fincas y lotes
-- 🌿 **Gestión de Spots y Plantas** - Visualización y gestión de plantas en lotes
-- 📤 **Carga de Archivos CSV** - Validación y procesamiento de archivos CSV
-- 🔄 **Integración con Sioma** - Envío automático de datos a Sioma API
-- 📈 **Dashboard con Estadísticas** - Gráficos y estadísticas de fincas y lotes
-- 🔐 **Autenticación Completa** - Sistema de login/registro con rutas protegidas
-- 🎨 **UI Moderna** - Componentes shadcn/ui con diseño responsive
-- ⚡ **Rendimiento Optimizado** - React Query para caché y sincronización de datos
-- 📱 **Responsive自适应** - Diseño adaptable a dispositivos móviles
+- 🗺️ **Visualización de Mapas Interactivos** - Integración completa con Google Maps API para visualizar fincas, lotes y spots
+- 📊 **Gestión Completa de Fincas y Lotes** - Sistema CRUD completo con interfaz intuitiva
+- 🌿 **Gestión de Spots y Plantas** - Visualización detallada y gestión de plantas individuales en cada lote
+- 📤 **Validación Avanzada de CSV** - Sistema robusto de carga, validación y procesamiento de archivos CSV con:
+  - Detección de coordenadas duplicadas
+  - Validación de líneas y posiciones por lote
+  - Verificación de lotes válidos por finca
+  - Generación automática de reportes de errores
+  - Descarga de archivos CSV procesados
+- 🎯 **Tour Guiado Interactivo** - Sistema de onboarding con Driver.js para nuevos usuarios
+- 🔄 **Integración con Sioma API** - Envío automático y sincronización de datos
+- 📈 **Dashboard con Estadísticas** - Visualización de métricas y gráficos en tiempo real
+- 🔐 **Autenticación Segura** - Sistema completo de login/registro con rutas protegidas y persistencia de sesión
+- 🎨 **UI Moderna y Accesible** - Componentes shadcn/ui basados en Radix UI con diseño responsive
+- ⚡ **Alto Rendimiento** - React Query para caché inteligente y sincronización optimizada
+- 📱 **Diseño Responsive** - Completamente adaptable a dispositivos móviles y tablets
+- 🌙 **Experiencia de Usuario Mejorada** - Notificaciones toast, animaciones fluidas y feedback visual
 
 ## 🛠️ Tecnologías
 
@@ -46,9 +53,10 @@ Sistema moderno para la gestión de fincas, lotes, plantas y spots con visualiza
 ### UI y Estilos
 - **Tailwind CSS 3.4.1** - Framework CSS utility-first
 - **shadcn/ui** - Componentes UI accesibles basados en Radix UI
-- **Framer Motion 11.0.5** - Animaciones fluidw
-- **Lucide React 0.344.0** - Iconos SVG
-- **Recharts 3.3.0** - Gráficos y visualizaciones
+- **Framer Motion 11.0.5** - Animaciones fluidas y transiciones
+- **Lucide React 0.344.0** - Iconos SVG modernos
+- **Recharts 3.3.0** - Gráficos y visualizaciones de datos
+- **Driver.js 1.3.6** - Tour guiado interactivo para onboarding
 
 ### Formularios y Validación
 - **React Hook Form 7.65.0** - Gestión de formularios
@@ -56,9 +64,11 @@ Sistema moderno para la gestión de fincas, lotes, plantas y spots con visualiza
 - **@hookform/resolvers 5.2.2** - Integración React Hook Form + Zod
 
 ### Utilidades
-- **PapaParse 5.5.3** - Procesamiento de CSV
-- **ExcelJS 4.4.0** - Generación y lectura de Excel
-- **Sonner 1.4.0** - Notificaciones toast
+- **PapaParse 5.5.3** - Procesamiento y parsing de archivos CSV
+- **ExcelJS 4.4.0** - Generación y lectura de archivos Excel
+- **Sonner 1.4.0** - Sistema de notificaciones toast elegantes
+- **class-variance-authority** - Gestión de variantes de componentes
+- **clsx & tailwind-merge** - Utilidades para clases CSS condicionales
 
 ### Radix UI (shadcn/ui)
 - `@radix-ui/react-dialog` - Modales accesibles
@@ -81,11 +91,13 @@ Sistema moderno para la gestión de fincas, lotes, plantas y spots con visualiza
 
 ## 📦 Prerrequisitos
 
-- **Node.js** 18 o superior
-- **Yarn** (recomendado) o npm
-- Cuenta de **Google Cloud Platform** con API de Maps habilitada (opcional, para desarrollo local)
+- **Node.js** 18.0.0 o superior
+- **Yarn** 1.22.0 o superior (recomendado) o npm 9.0.0+
+- **Git** para control de versiones
+- Cuenta de **Google Cloud Platform** con Maps JavaScript API habilitada (opcional para mapas)
+- Backend API compatible corriendo (ver sección de Configuración)
 
-## 🚀 Instalación
+## 🚀 Instalación Rápida
 
 ### 1. Clonar el repositorio
 
@@ -94,28 +106,35 @@ git clone <tu-repositorio>
 cd hackthon-frontend
 ```
 
-### 2. Instalar dependencias con Yarn
+### 2. Instalar dependencias
 
+Con Yarn (recomendado):
 ```bash
 yarn install
 ```
 
-> **Nota**: Si prefieres usar npm, ejecuta `npm install` en su lugar.
+Con npm:
+```bash
+npm install
+```
 
 ### 3. Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto:
+Crea un archivo `.env` en la raíz del proyecto basado en el ejemplo:
 
 ```env
-# API Backend
+# API Backend Principal (REQUERIDO)
 VITE_API_URL=http://localhost:5000/api
 
-# Google Maps API Key (opcional, necesario para mapas)
-VITE_GOOGLE_MAPS_API_KEY=tu_api_key_aqui
+# Google Maps API Key (OPCIONAL - solo para visualización de mapas)
+# Obtén tu API key en: https://console.cloud.google.com/
+VITE_GOOGLE_MAPS_API_KEY=tu_google_maps_api_key_aqui
 
-# Sioma API (opcional, solo si usas integración con Sioma)
+# Sioma API (OPCIONAL - solo si usas integración con Sioma)
 VITE_SIOMA_API_URL=https://plantizador.sioma.dev/api/v1
 ```
+
+> **💡 Tip**: El proyecto funcionará sin Google Maps API Key, pero la visualización de mapas estará limitada.
 
 ### 4. Iniciar el servidor de desarrollo
 
@@ -123,26 +142,54 @@ VITE_SIOMA_API_URL=https://plantizador.sioma.dev/api/v1
 yarn dev
 ```
 
-La aplicación estará disponible en `http://localhost:5173`
+🎉 **¡Listo!** La aplicación estará disponible en `http://localhost:5173`
+
+### 5. (Opcional) Construir para producción
+
+```bash
+yarn build
+yarn preview  # Para previsualizar el build
+```
 
 ## ⚙️ Configuración
 
-### Google Maps API
+### Configuración de Google Maps API
 
-Para usar la visualización de mapas, necesitas:
+Para habilitar la visualización de mapas interactivos:
 
-1. Crear un proyecto en [Google Cloud Console](https://console.cloud.google.com/)
-2. Habilitar la API de Maps JavaScript
-3. Crear una API Key
-4. Agregar la key en `.env` como `VITE_GOOGLE_MAPS_API_KEY`
+1. **Crear proyecto en Google Cloud**
+   - Accede a [Google Cloud Console](https://console.cloud.google.com/)
+   - Crea un nuevo proyecto o selecciona uno existente
 
-### API Backend
+2. **Habilitar APIs necesarias**
+   - Maps JavaScript API
+   - Places API (opcional, para búsquedas)
 
-El proyecto está configurado para conectarse a un backend en `VITE_API_URL`. Asegúrate de que:
+3. **Crear credenciales**
+   - Navega a "APIs & Services" → "Credentials"
+   - Crea una API Key
+   - (Recomendado) Restringe la key a tu dominio
 
-- El backend esté corriendo
-- Las rutas coincidan con las esperadas
-- El sistema de autenticación sea compatible
+4. **Configurar en el proyecto**
+   - Agrega la key en `.env` como `VITE_GOOGLE_MAPS_API_KEY`
+
+### Configuración del Backend
+
+El frontend se conecta a una API backend REST. Requisitos:
+
+**Endpoints esperados:**
+- `POST /auth/login` - Autenticación de usuarios
+- `POST /auth/register` - Registro de nuevos usuarios
+- `GET /api/v1/fincas` - Listado de fincas
+- `GET /api/v1/lotes` - Listado de lotes
+- `POST /api/v1/spots` - Creación de spots
+- Y más... (ver documentación de cada módulo)
+
+**Configuración:**
+- Asegúrate de que el backend esté corriendo en el puerto configurado
+- Las rutas deben coincidir con las definidas en los servicios
+- El sistema de autenticación debe usar JWT o compatible
+- CORS debe estar configurado para permitir requests del frontend
 
 ## 📜 Scripts Disponibles
 
@@ -274,16 +321,18 @@ hackthon-frontend/
 │   └── shared/                      # Recursos compartidos
 │       ├── components/
 │       │   └── DataTable.tsx           # Tabla de datos reutilizable
+│       ├── hooks/
+│       │   └── useTour.ts              # Hook para tour guiado
 │       ├── layout/
 │       │   ├── MainLayout.tsx          # Layout principal
 │       │   ├── AuthLayout.tsx          # Layout de autenticación
-│       │   └── DashboardLayout.tsx     # Layout del dashboard
+│       │   └── DashboardLayout.tsx     # Layout del dashboard con tour
 │       ├── mocks/
-│       │   ├── mockData.ts             # Datos mock
+│       │   ├── mockData.ts             # Datos mock para desarrollo
 │       │   └── mockService.ts          # Servicios mock
 │       └── utils/
-│           ├── cn.ts                  # Utilidad para clases CSS
-│           └── persistence.ts         # Persistencia de datos
+│           ├── cn.ts                   # Utilidad para clases CSS condicionales
+│           └── persistence.ts          # Persistencia de datos en localStorage
 │
 ├── public/                          # Archivos públicos
 ├── index.html                       # HTML principal
@@ -330,11 +379,21 @@ Sistema completo para validación, previsualización y envío de archivos CSV.
 - Integración con Sioma para envío automático
 - Transformación de datos según formato requerido
 
-**Validaciones:**
-- Formato de coordenadas (latitud/longitud)
-- Coordenadas duplicadas
-- Combinaciones de línea+palma duplicadas
-- Lotes válidos para la finca seleccionada
+**Validaciones implementadas:**
+- ✅ Formato correcto de coordenadas (latitud/longitud con punto decimal)
+- ✅ Detección de coordenadas duplicadas en todo el archivo
+- ✅ Validación de combinaciones únicas línea+palma por lote
+- ✅ Verificación de lotes válidos según la finca seleccionada
+- ✅ Detección y eliminación automática de filas completamente duplicadas
+- ✅ Validación de campos vacíos y rangos de coordenadas
+- ✅ Generación de reporte detallado de errores en formato CSV
+
+**Características adicionales:**
+- Descarga de plantilla CSV con formato correcto
+- Previsualización de datos antes del procesamiento
+- Transformación automática de datos al formato requerido
+- Generación de nombres únicos para spots y plantas
+- Integración con API de Sioma para envío automático
 
 ### 🏢 Módulo de Fincas (`dashboard/fincas`)
 
@@ -360,9 +419,23 @@ Gestión CRUD completa de lotes.
 Gestión CRUD completa de usuarios del sistema.
 
 **Funcionalidades:**
-- Listado de usuarios
-- Creación y edición de usuarios
+- Listado de usuarios con tabla interactiva
+- Creación y edición de usuarios con formularios validados
 - Gestión de roles y permisos
+- Avatares dinámicos con iniciales
+- Estados visuales (activo/inactivo)
+
+### 🎯 Tour Guiado Interactivo
+
+Sistema de onboarding automático para nuevos usuarios usando Driver.js.
+
+**Características:**
+- Tour automático en el primer ingreso
+- Explicación de cada módulo del sistema
+- Botón de ayuda flotante para reiniciar el tour
+- Navegación paso a paso con progreso visual
+- Solo visible en escritorio (≥1024px)
+- Persistencia en localStorage para no repetir
 
 ## 💻 Uso
 
@@ -502,29 +575,96 @@ VITE_SIOMA_API_URL=https://plantizador.sioma.dev/api/v1
 - [Tailwind CSS Documentation](https://tailwindcss.com/)
 
 ### Librerías Clave
-- [React Query (TanStack Query)](https://tanstack.com/query/latest)
-- [Zustand](https://zustand-demo.pmnd.rs/)
-- [React Router](https://reactrouter.com/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [React Hook Form](https://react-hook-form.com/)
-- [Zod](https://zod.dev/)
+- [React Query (TanStack Query)](https://tanstack.com/query/latest) - Gestión de estado del servidor
+- [Zustand](https://zustand-demo.pmnd.rs/) - Estado global ligero
+- [React Router](https://reactrouter.com/) - Enrutamiento declarativo
+- [shadcn/ui](https://ui.shadcn.com/) - Componentes UI accesibles
+- [Framer Motion](https://www.framer.com/motion/) - Animaciones avanzadas
+- [React Hook Form](https://react-hook-form.com/) - Formularios performantes
+- [Zod](https://zod.dev/) - Validación de esquemas
+- [Driver.js](https://driverjs.com/) - Tours guiados interactivos
+- [PapaParse](https://www.papaparse.com/) - Procesamiento de CSV
 
 ### APIs Externas
 - [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
 
 ## 🤝 Contribución
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+¡Las contribuciones son bienvenidas! Por favor sigue estos pasos:
+
+1. **Fork** el proyecto
+2. **Crea una rama** para tu feature 
+   ```bash
+   git checkout -b feature/NuevaCaracteristica
+   ```
+3. **Commit** tus cambios siguiendo las convenciones
+   ```bash
+   git commit -m 'feat: Agrega nueva característica X'
+   ```
+4. **Push** a la rama
+   ```bash
+   git push origin feature/NuevaCaracteristica
+   ```
+5. **Abre un Pull Request** con descripción detallada
+
+### Convenciones de Código
+
+- Seguir las reglas de ESLint configuradas
+- Usar TypeScript para todo el código nuevo
+- Nombrar componentes en PascalCase
+- Nombrar archivos/funciones en camelCase
+- Documentar funciones complejas
+- Escribir código legible y mantenible
+
+### Estructura de Commits
+
+Seguir [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` Nueva característica
+- `fix:` Corrección de bug
+- `docs:` Cambios en documentación
+- `style:` Cambios de formato (no afectan lógica)
+- `refactor:` Refactorización de código
+- `test:` Agregar o modificar tests
+- `chore:` Tareas de mantenimiento
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+Este proyecto está bajo la Licencia MIT - consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+## 👨‍💻 Autores y Agradecimientos
+
+- **Equipo de Desarrollo** - Desarrollo inicial y mantenimiento
+- **Comunidad Open Source** - Por las increíbles herramientas utilizadas
+
+## 📧 Soporte y Contacto
+
+¿Tienes preguntas o necesitas ayuda?
+
+- 📧 Email: soporte@agrosyner.com
+- 🐛 Reporta bugs en: [GitHub Issues](https://github.com/tu-repo/issues)
+- 💬 Discusiones: [GitHub Discussions](https://github.com/tu-repo/discussions)
+
+## 🗺️ Roadmap
+
+### Próximas características
+
+- [ ] Módulo de reportes avanzados con exportación PDF
+- [ ] Sistema de notificaciones en tiempo real
+- [ ] Integración con drones para captura de imágenes
+- [ ] App móvil nativa (React Native)
+- [ ] Modo offline con sincronización
+- [ ] Análisis de suelos con ML
+- [ ] Dashboard de analíticas avanzadas
+
+## 📊 Estado del Proyecto
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-green)]()
 
 ---
 
-¡Feliz codificación! 🚀
+**Hecho con ❤️ para la agricultura de precisión**
+
+¡Feliz codificación! 🚀🌱
