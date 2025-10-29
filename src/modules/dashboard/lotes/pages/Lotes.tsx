@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 import { Spinner } from '@/components/ui/spinner';
 import { DataTable } from '@/shared/components/DataTable';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useLotesPage } from '../hooks/useLotes';
+import { useLotesPage, useObtenerCoordenadas } from '../hooks/useLotes';
 import { Lote } from '../types/lotes.types';
 import { SiglaCell, GrupoCell, KeyValueCell, FincaIdCell, ActionsCell } from '../components/LotesCellTemplates';
+import { MapaCoordenadas } from '../components/MapaCoordenadas';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -16,6 +17,11 @@ const fadeInUp = {
 export default function Lotes() {
   const { lotes, isLoading } = useLotesPage();
   const [loteParaVerCoordenadas, setLoteParaVerCoordenadas] = useState<Lote | null>(null);
+
+  const { 
+    data: coordenadas = [], 
+    isLoading: isLoadingCoordenadas 
+  } = useObtenerCoordenadas(loteParaVerCoordenadas ? parseInt(loteParaVerCoordenadas.id) : null);
 
   const handleVerCoordenadas = (lote: Lote) => {
     setLoteParaVerCoordenadas(lote);
@@ -108,43 +114,58 @@ export default function Lotes() {
 
       {/* Dialog para ver coordenadas */}
       <Dialog open={!!loteParaVerCoordenadas} onOpenChange={handleCloseCoordenadas}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Coordenadas del Lote</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-[#AA0F16]">
+              Coordenadas del Lote
+            </DialogTitle>
             <DialogDescription>
-              Información de coordenadas para el lote: {loteParaVerCoordenadas?.nombre}
+              Visualización del mapa de coordenadas para: {loteParaVerCoordenadas?.nombre}
             </DialogDescription>
           </DialogHeader>
           
           {loteParaVerCoordenadas && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">ID del Lote</p>
-                  <p className="text-sm font-mono">{loteParaVerCoordenadas.id}</p>
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                    ID del Lote
+                  </p>
+                  <p className="text-sm font-mono font-semibold mt-1">{loteParaVerCoordenadas.id}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Key Value</p>
-                  <p className="text-sm font-mono">{loteParaVerCoordenadas.keyValue}</p>
+                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                    Key Value
+                  </p>
+                  <p className="text-sm font-mono font-semibold mt-1">{loteParaVerCoordenadas.keyValue}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Finca ID</p>
-                  <p className="text-sm">{loteParaVerCoordenadas.fincaId}</p>
+                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                    Finca ID
+                  </p>
+                  <p className="text-sm font-semibold mt-1">{loteParaVerCoordenadas.fincaId}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Nombre</p>
-                  <p className="text-sm font-semibold">{loteParaVerCoordenadas.nombre}</p>
+                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                    Grupo
+                  </p>
+                  <p className="text-sm font-semibold mt-1">{loteParaVerCoordenadas.grupo}</p>
                 </div>
               </div>
               
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Las coordenadas del lote se obtendrán desde el servicio de mapas.
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Nota: Esta funcionalidad requiere conectarse al endpoint de coordenadas del lote.
-                </p>
-              </div>
+              {isLoadingCoordenadas ? (
+                <div className="flex items-center justify-center h-[400px] bg-neutral-50 rounded-lg border border-neutral-200">
+                  <div className="text-center">
+                    <Spinner size="lg" />
+                    <p className="text-sm text-neutral-600 mt-4">Cargando coordenadas...</p>
+                  </div>
+                </div>
+              ) : (
+                <MapaCoordenadas 
+                  coordenadas={coordenadas} 
+                  nombreLote={loteParaVerCoordenadas.nombre}
+                />
+              )}
             </div>
           )}
         </DialogContent>
