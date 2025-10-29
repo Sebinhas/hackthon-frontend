@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuthStore } from '@/core/store/authStore';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/landing/Logo.png';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -23,7 +24,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-[#AA0F16]">Plant Template</span>
+              <img src={logo} alt="Logo" className="w-10 h-10" />
             </Link>
 
             <div className="flex items-center gap-4">
@@ -71,7 +72,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <footer className="bg-white border-t border-gray-200 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-center text-gray-600 text-sm">
-            © {new Date().getFullYear()} Plant Template. Todos los derechos reservados.
+            © {new Date().getFullYear()} Juan's Devs. Todos los derechos reservados.
           </p>
         </div>
       </footer>

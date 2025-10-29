@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/shared/utils/cn';
-
+import logo from '@/assets/landing/Logo.png';
 interface DashboardLayoutProps {
   children: ReactNode;
 }
@@ -99,10 +99,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               to="/dashboard" 
               className="flex items-center space-x-2 transition-opacity hover:opacity-80"
             >
-              <span className="text-base sm:text-lg md:text-xl font-semibold tracking-tight text-[#AA0F16]">
-                <span className="hidden sm:inline">Plant Template</span>
-                <span className="sm:hidden">Plant</span>
-              </span>
+              <img src={logo} alt="Logo" className="w-10 h-10" />
             </Link>
           </div>
 
