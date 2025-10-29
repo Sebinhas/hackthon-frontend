@@ -75,3 +75,8 @@ export interface CsvRow {
   Latitud: string;
   [key: string]: string | number;
 }
+
+export interface ValidationCompleteData {
+  csvRows: CsvRow[];
+  fincaId: number;
+}

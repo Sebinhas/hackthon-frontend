@@ -7,6 +7,7 @@ import { CsvPreview } from '../components/CsvPreview';
 import { CsvInlinePreview } from '../components/CsvInlinePreview';
 import { ValidationSummary } from '../components/ValidationSummary';
 import { useUploadFilePage } from '../hooks/useUploadFile';
+import { Download } from 'lucide-react';
 
 export default function UploadFile() {
   const {
@@ -23,6 +24,7 @@ export default function UploadFile() {
     previewData,
     handleValidationComplete,
     clearValidation,
+    handleDownloadCsv,
   } = useUploadFilePage();
 
   if (isLoading) {
@@ -65,8 +67,12 @@ export default function UploadFile() {
                 Cerrar
               </Button>
               {validationSummary.isValid && (
-                <Button className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white">
-                  Proceder con la subida (próximamente)
+                <Button 
+                  className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
+                  onClick={handleDownloadCsv}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Descargar CSV
                 </Button>
               )}
             </DialogFooter>
