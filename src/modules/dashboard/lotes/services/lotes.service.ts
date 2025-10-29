@@ -1,5 +1,5 @@
 import { api } from '@/core/api/useConfigApi';
-import { Lote, LotesResponse } from '../types/lotes.types';
+import { Lote, LotesResponse, Coordenada, CoordenadasResponse } from '../types/lotes.types';
 
 export const lotesService = {
   obtenerLotes: async (fincaId?: number): Promise<Lote[]> => {
@@ -14,6 +14,15 @@ export const lotesService = {
       return response.data.data || [];
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error al obtener lotes');
+    }
+  },
+
+  obtenerCoordenadas: async (loteId: number): Promise<Coordenada[]> => {
+    try {
+      const response = await api.get<CoordenadasResponse>(`/api/v1/coordenadas?lote=${loteId}`);
+      return response.data.data || [];
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Error al obtener coordenadas del lote');
     }
   },
 };

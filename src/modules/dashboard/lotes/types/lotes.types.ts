@@ -16,3 +16,18 @@ export interface LotesResponse {
   data: Lote[];
 }
 
+export interface Coordenada {
+  punto_lote_id: number;
+  lote_id: number;
+  lat: string;
+  lng: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CoordenadasResponse {
+  status: number;
+  message: string;
+  data: Coordenada[];
+}
+
