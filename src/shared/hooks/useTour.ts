@@ -76,9 +76,7 @@ export const useTour = () => {
       }
     };
 
-    const driverSteps = steps.map((step, index) => {
-      const isLastStep = index === steps.length - 1;
-      
+    const driverSteps = steps.map((step) => {
       return {
         element: step.element,
         popover: {
@@ -86,11 +84,6 @@ export const useTour = () => {
           description: step.popover.description,
           side: step.popover.side || 'left',
           align: step.popover.align || 'start',
-          // En el último paso, mostrar botón "Finalizar" en lugar de "Siguiente"
-          doneBtnText: isLastStep ? 'Finalizar' : undefined,
-          nextBtnText: '',
-          prevBtnText: '',
-          closeBtnText: '×',
         },
       };
     });
@@ -101,6 +94,9 @@ export const useTour = () => {
       allowClose: true,
       popoverClass: 'driverjs-theme',
       progressText: 'Paso {{current}} de {{total}}',
+      nextBtnText: 'Siguiente',
+      prevBtnText: 'Anterior',
+      doneBtnText: 'Finalizar',
       steps: driverSteps,
       onDestroyStarted: () => {
         handleClose();
