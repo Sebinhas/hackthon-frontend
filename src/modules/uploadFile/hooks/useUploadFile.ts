@@ -137,7 +137,7 @@ export const useUploadFilePage = () => {
       const csvContent = generarCsvString(datosTransformados);
       
       // Descargar
-      const nombreArchivo = `archivo_procesado_${new Date().getTime()}.csv`;
+      const nombreArchivo = `Spots.csv`;
       descargarCsv(csvContent, nombreArchivo);
       
       toast.success('CSV generado y descargado exitosamente');
