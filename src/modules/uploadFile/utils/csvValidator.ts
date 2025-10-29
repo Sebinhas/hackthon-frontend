@@ -17,7 +17,7 @@ export const validarCsv = (
     const lote = String(row.Lote || '').trim();
     const linea = String(row.Linea || '').trim();
     const palma = String(row.Palma || '').trim();
-    const longitud = String(row.Logitud || '').trim();
+    const longitud = String(row.Longitud || '').trim();
     const latitud = String(row.Latitud || '').trim();
     
     // Retornar true solo si al menos un campo tiene contenido
@@ -108,7 +108,7 @@ const validarFormatoCoordenadas = (rows: CsvRow[]): ValidationError[] => {
 
   rows.forEach((row) => {
     const latitudStr = String(row.Latitud || '').trim();
-    const longitudStr = String(row.Logitud || '').trim();
+    const longitudStr = String(row.Longitud || '').trim();
 
     let tieneError = false;
     const erroresEnFila: string[] = [];
@@ -153,7 +153,7 @@ const validarCoordenadasDuplicadas = (rows: CsvRow[]): number[] => {
 
   rows.forEach((row) => {
     const latitudStr = String(row.Latitud || '').trim();
-    const longitudStr = String(row.Logitud || '').trim();
+    const longitudStr = String(row.Longitud || '').trim();
 
     // Si tiene coma, no validamos duplicados porque ya hay error de formato
     if (latitudStr.includes(',') || longitudStr.includes(',')) {
@@ -272,7 +272,7 @@ const validarFormatoBasico = (rows: CsvRow[]): ValidationError[] => {
       Lote: String(row.Lote || '').trim(),
       Linea: String(row.Linea || '').trim(),
       Palma: String(row.Palma || '').trim(),
-      Logitud: String(row.Logitud || '').trim(),
+      Longitud: String(row.Longitud || '').trim(),
       Latitud: String(row.Latitud || '').trim(),
     };
 
@@ -286,12 +286,12 @@ const validarFormatoBasico = (rows: CsvRow[]): ValidationError[] => {
 
     // Validar coordenadas (solo si no tienen coma)
     const latitudStr = camposRequeridos.Latitud.replace(',', '.');
-    const longitudStr = camposRequeridos.Logitud.replace(',', '.');
+    const longitudStr = camposRequeridos.Longitud.replace(',', '.');
 
     const lat = parseFloat(latitudStr);
     const lng = parseFloat(longitudStr);
 
-    if (camposRequeridos.Latitud || camposRequeridos.Logitud) {
+    if (camposRequeridos.Latitud || camposRequeridos.Longitud) {
       if (isNaN(lat) || isNaN(lng)) {
         filasConCoordenadasInvalidas.push(row.rowNumber);
       } else {
@@ -307,7 +307,7 @@ const validarFormatoBasico = (rows: CsvRow[]): ValidationError[] => {
       type: 'error',
       message: `Campos obligatorios vacíos`,
       affectedRows: filasConCamposVacios,
-      detail: `Se encontraron ${filasConCamposVacios.length} registro(s) con campos obligatorios vacíos. Todos los campos (Lote, Linea, Palma, Logitud, Latitud) son requeridos.`,
+      detail: `Se encontraron ${filasConCamposVacios.length} registro(s) con campos obligatorios vacíos. Todos los campos (Lote, Linea, Palma, Longitud, Latitud) son requeridos.`,
     });
   }
 

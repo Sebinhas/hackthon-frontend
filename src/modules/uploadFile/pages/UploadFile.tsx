@@ -8,8 +8,15 @@ import { CsvInlinePreview } from '../components/CsvInlinePreview';
 import { ValidationSummary } from '../components/ValidationSummary';
 import { useUploadFilePage } from '../hooks/useUploadFile';
 import { Download } from 'lucide-react';
+import { ValidationCompleteData } from '../types/uploadFile.types';
 
-export default function UploadFile() {
+interface UploadFileProps {
+  fincaId?: number | null;
+  onValidationSuccess?: (data: ValidationCompleteData) => void;
+  onClearValidation?: () => void;
+}
+
+export default function UploadFile({ fincaId = null, onValidationSuccess, onClearValidation }: UploadFileProps) {
   const {
     archivos,
     isLoading,
@@ -38,7 +45,16 @@ export default function UploadFile() {
         <p className="text-muted-foreground">Carga archivos CSV y visualiza una previsualización de sus datos.</p>
       </div>
 
-      <UploadForm onValidationComplete={handleValidationComplete} />
+      <UploadForm 
+        fincaId={fincaId} 
+        onValidationComplete={(summary, preview, validationData) => {
+          handleValidationComplete(summary, preview, validationData);
+          // Si la validación es exitosa, notificar al padre
+          if (summary.isValid && validationData && onValidationSuccess) {
+            onValidationSuccess(validationData);
+          }
+        }} 
+      />
 
       {/* Mostrar resumen de validación si existe */}
       {validationSummary && previewData && (
@@ -63,7 +79,15 @@ export default function UploadFile() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={clearValidation}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  clearValidation();
+                  if (onClearValidation) {
+                    onClearValidation();
+                  }
+                }}
+              >
                 Cerrar
               </Button>
               {validationSummary.isValid && (

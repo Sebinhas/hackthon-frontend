@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle2, FileSpreadsheet, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useObtenerFincas } from '../hooks/useUploadFile';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { uploadFileService } from '../services/uploadFile.service';
@@ -10,6 +8,7 @@ import { validarCsv } from '../utils/csvValidator';
 import { CsvRow, ValidationSummary } from '../types/uploadFile.types';
 
 interface UploadFormProps {
+  fincaId: number | null;
   onValidationComplete: (
     summary: ValidationSummary,
     previewData: { headers: string[]; rows: Record<string, any>[]; totalRows: number },
@@ -17,14 +16,12 @@ interface UploadFormProps {
   ) => void;
 }
 
-export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
+export const UploadForm = ({ fincaId, onValidationComplete }: UploadFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFincaId, setSelectedFincaId] = useState<number | null>(null);
   const [isValidating, setIsValidating] = useState(false);
-  const { data: fincas = [], isLoading: isLoadingFincas } = useObtenerFincas();
 
   const handleDownloadTemplate = () => {
-    const headers = ['Lote', 'Linea', 'Palma', 'Logitud', 'Latitud'];
+    const headers = ['Lote', 'Linea', 'Palma', 'Longitud', 'Latitud'];
     const csvContent = '\uFEFF' + headers.join(',') + '\n';
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -52,8 +49,8 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (selectedFincaId === null) {
-      toast.error('Selecciona una finca antes de validar el archivo.');
+    if (fincaId === null) {
+      toast.error('Debes seleccionar una finca primero.');
       return;
     }
 
@@ -68,7 +65,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
       // Obtener lotes válidos para la finca
       let lotesValidos: string[] = [];
       try {
-        lotesValidos = await uploadFileService.obtenerLotesValidosPorFinca(selectedFincaId);
+        lotesValidos = await uploadFileService.obtenerLotesValidosPorFinca(fincaId);
         console.log('Lotes válidos obtenidos:', lotesValidos);
       } catch (errorLotes: any) {
         console.error('Error al obtener lotes:', errorLotes);
@@ -105,7 +102,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
           }
 
           // Validar headers requeridos
-          const headersEsperados = ['Lote', 'Linea', 'Palma', 'Logitud', 'Latitud'];
+          const headersEsperados = ['Lote', 'Linea', 'Palma', 'Longitud', 'Latitud'];
           const headersReales = Object.keys(data[0] || {});
           const headersFaltantes = headersEsperados.filter(h => !headersReales.includes(h));
           
@@ -124,7 +121,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
             const lote = String(row.Lote || '').trim();
             const linea = String(row.Linea || '').trim();
             const palma = String(row.Palma || '').trim();
-            const longitud = String(row.Logitud || '').trim();
+            const longitud = String(row.Longitud || '').trim();
             const latitud = String(row.Latitud || '').trim();
             
             // Verificar si la fila está completamente vacía
@@ -137,7 +134,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
                 Lote: lote,
                 Linea: linea,
                 Palma: palma,
-                Logitud: longitud,
+                Longitud: longitud,
                 Latitud: latitud,
               });
             }
@@ -151,7 +148,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
 
           // Ejecutar validaciones
           const validationSummary = validarCsv(csvRows, {
-            fincaId: selectedFincaId,
+            fincaId: fincaId,
             lotesValidos,
           });
 
@@ -164,7 +161,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
               Lote: row.Lote,
               Linea: row.Linea,
               Palma: row.Palma,
-              Logitud: row.Logitud,
+              Longitud: row.Longitud,
               Latitud: row.Latitud,
             })),
             totalRows: data.length,
@@ -172,7 +169,7 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
 
           // Llamar callback con resumen de validación y preview
           const validationData = validationSummary.isValid
-            ? { csvRows, fincaId: selectedFincaId }
+            ? { csvRows, fincaId: fincaId }
             : undefined;
 
           onValidationComplete(validationSummary, previewData, validationData);
@@ -214,24 +211,6 @@ export const UploadForm = ({ onValidationComplete }: UploadFormProps) => {
         </Button>
       </div>
       <div className="grid gap-4">
-        <div className="flex items-end gap-4">
-          <div className="w-full">
-            <label className="block text-sm font-medium mb-1">Finca</label>
-            <Select onValueChange={(v) => setSelectedFincaId(Number(v))}>
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingFincas ? 'Cargando fincas...' : 'Selecciona una finca'} />
-              </SelectTrigger>
-              <SelectContent>
-                {fincas.map((finca) => (
-                  <SelectItem key={finca.keyValue} value={String(finca.keyValue)}>
-                    {finca.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#AA0F16] transition-colors">
           <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Finca } from '../types/lotes.types';
+import { Finca } from '../../fincas/types/fincas.types';
+import { Spinner } from '@/components/ui/spinner';
 
 interface SelectorFincasProps {
   fincas: Finca[];
@@ -39,9 +40,9 @@ export const SelectorFincas: React.FC<SelectorFincasProps> = ({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todas las fincas</SelectItem>
+          <SelectItem value="all">{isLoading ? <div className="flex items-center gap-2"><span>Espere un momento...</span> <Spinner size="sm" /></div> : 'Seleccionar Finca'}</SelectItem>
           {fincas.map((finca) => (
-            <SelectItem key={finca.key_value} value={finca.key_value.toString()}>
+            <SelectItem key={finca.keyValue} value={finca.keyValue.toString()}>
               <div className="flex flex-col">
                 <span className="font-medium">{finca.nombre}</span>
                 <span className="text-xs text-gray-500">
