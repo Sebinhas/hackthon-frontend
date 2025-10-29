@@ -135,6 +135,7 @@ export const SelectorMapaInteractivo = ({
     } else {
       const script = document.createElement('script');
       script.src = getGoogleMapsScriptUrl();
+      script.setAttribute('loading', 'async');
       script.async = true;
       script.defer = true;
       script.onload = () => {
