@@ -9,7 +9,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { MapaReal } from './MapaReal';
 import { Lote, Planta } from '../types/lotes.types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, Send } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Info, Send, AlertTriangle } from 'lucide-react';
 import { mockLotes } from '@/shared/mocks/mockData';
 import UploadFile from '@/modules/uploadFile/pages/UploadFile';
 import { Finca } from '../../fincas/types/fincas.types';
@@ -33,6 +34,8 @@ export const VistaLotesMapa: React.FC = () => {
   // Estado para datos validados del CSV
   const [datosValidadosCsv, setDatosValidadosCsv] = useState<ValidationCompleteData | null>(null);
   const [enviandoASioma, setEnviandoASioma] = useState(false);
+  const [mostrarConfirmacionEnvio, setMostrarConfirmacionEnvio] = useState(false);
+  const [respuestaSioma, setRespuestaSioma] = useState<any>(null);
 
   // Hooks para obtener datos
   const { data: fincas = [], isLoading: isLoadingFincas } = useObtenerFincas();
@@ -120,23 +123,41 @@ export const VistaLotesMapa: React.FC = () => {
     setDatosValidadosCsv(null);
   };
 
-  // Función para enviar datos a Sioma
-  const handleEnviarASioma = async () => {
+  // Función para abrir diálogo de confirmación
+  const handleAbrirConfirmacionEnvio = () => {
+    if (!datosValidadosCsv) return;
+    setMostrarConfirmacionEnvio(true);
+  };
+
+  // Función para enviar datos a Sioma (después de confirmación)
+  const handleConfirmarEnvioASioma = async () => {
     if (!datosValidadosCsv) return;
 
     setEnviandoASioma(true);
+    setMostrarConfirmacionEnvio(false);
+    
     try {
       // Importar dinámicamente el servicio de Sioma
       const { siomaService } = await import('../services/sioma.service');
       
       // Enviar datos a la API de Sioma
-      await siomaService.enviarDatosASioma(datosValidadosCsv);
+      const respuesta = await siomaService.enviarDatosASioma(datosValidadosCsv);
       
-      toast.success(`Datos enviados exitosamente a Sioma (${datosValidadosCsv.csvRows.length} registros)`);
-      setDatosValidadosCsv(null); // Limpiar después de enviar exitosamente
+      // Guardar respuesta para mostrarla en un diálogo
+      setRespuestaSioma(respuesta);
+      
+      // Mostrar toast de éxito
+      const mensajeRespuesta = respuesta.data 
+        ? `✅ ${respuesta.message || 'Datos enviados exitosamente a Sioma'}`
+        : `✅ Datos enviados exitosamente a Sioma`;
+      toast.success(mensajeRespuesta);
+      
+      // Limpiar datos después de enviar exitosamente
+      setDatosValidadosCsv(null);
     } catch (error: any) {
       console.error('Error al enviar datos a Sioma:', error);
       toast.error(`Error al enviar datos: ${error.message || 'Error desconocido'}`);
+      setRespuestaSioma(null);
     } finally {
       setEnviandoASioma(false);
     }
@@ -144,15 +165,33 @@ export const VistaLotesMapa: React.FC = () => {
 
   // Convertir datos del CSV a formato Planta para visualización en el mapa
   const spotsDeLoteCsv = useMemo<Planta[]>(() => {
-    if (!datosValidadosCsv || !loteSeleccionado) return [];
+    if (!datosValidadosCsv || !loteSeleccionado) {
+      console.log('spotsDeLoteCsv: No hay datos validados o lote seleccionado');
+      return [];
+    }
 
     // Obtener el nombre del lote seleccionado
     const loteData = lotes.find(l => l.id === loteSeleccionado);
-    if (!loteData) return [];
+    if (!loteData) {
+      console.log('spotsDeLoteCsv: No se encontró lote con id', loteSeleccionado);
+      return [];
+    }
+
+    console.log('spotsDeLoteCsv - Filtrando CSV:', {
+      loteSeleccionadoId: loteSeleccionado,
+      loteDataNombre: loteData.nombre,
+      totalCsvRows: datosValidadosCsv.csvRows.length,
+      lotesDisponiblesEnCsv: [...new Set(datosValidadosCsv.csvRows.map(r => r.Lote))]
+    });
 
     // Filtrar spots del CSV que pertenecen al lote seleccionado
-    return datosValidadosCsv.csvRows
-      .filter(row => row.Lote === loteData.nombre)
+    const spotsFiltrados = datosValidadosCsv.csvRows
+      .filter(row => {
+        const loteCsv = String(row.Lote || '').trim();
+        const loteNombre = String(loteData.nombre || '').trim();
+        // Comparar tanto por nombre como por ID (por si el CSV tiene el ID como string)
+        return loteCsv === loteNombre || loteCsv === loteSeleccionado || loteCsv === loteData.id;
+      })
       .map(row => ({
         nombre_spot: `${row.Lote}-L${row.Linea}-S${row.Palma}`,
         lat: parseFloat(row.Latitud),
@@ -164,7 +203,25 @@ export const VistaLotesMapa: React.FC = () => {
         finca_id: datosValidadosCsv.fincaId,
         cargado: true,
       }));
+
+    console.log('spotsDeLoteCsv - Spots filtrados:', spotsFiltrados.length);
+    return spotsFiltrados;
   }, [datosValidadosCsv, loteSeleccionado, lotes]);
+
+  // Calcular estadísticas de spots (del CSV si está disponible, sino del servicio)
+  const spotsParaEstadisticas = useMemo(() => {
+    if (spotsDeLoteCsv.length > 0) {
+      return spotsDeLoteCsv;
+    }
+    return plantas;
+  }, [spotsDeLoteCsv, plantas]);
+
+  // Calcular número de líneas únicas
+  const numeroLineas = useMemo(() => {
+    if (spotsParaEstadisticas.length === 0) return 0;
+    const lineasUnicas = new Set(spotsParaEstadisticas.map(p => p.linea));
+    return lineasUnicas.size;
+  }, [spotsParaEstadisticas]);
 
   return (
     <div className="w-full h-full flex flex-col gap-6">
@@ -199,7 +256,7 @@ export const VistaLotesMapa: React.FC = () => {
                 <span>Archivo validado ({datosValidadosCsv.csvRows.length} registros)</span>
               </div>
               <Button
-                onClick={handleEnviarASioma}
+                onClick={handleAbrirConfirmacionEnvio}
                 disabled={enviandoASioma}
                 className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
               >
@@ -286,7 +343,7 @@ export const VistaLotesMapa: React.FC = () => {
                   <CardTitle className="text-lg">Estadísticas de Spots</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {isLoadingPlantas ? (
+                  {isLoadingPlantas && spotsDeLoteCsv.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8">
                       <Spinner size="md" />
                       <p className="text-xs text-gray-500 mt-2">Cargando datos...</p>
@@ -295,20 +352,26 @@ export const VistaLotesMapa: React.FC = () => {
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                          <div className="text-3xl font-bold text-gray-900">{plantas.length}</div>
+                          <div className="text-3xl font-bold text-gray-900">{spotsParaEstadisticas.length}</div>
                           <div className="text-sm text-gray-600 mt-1">Total Spots</div>
                         </div>
                         <div className="text-center p-4 bg-green-50 rounded-lg">
                           <div className="text-3xl font-bold text-green-600">
-                            {plantas.filter(p => p.cargado).length}
+                            {spotsParaEstadisticas.filter(p => p.cargado).length}
                           </div>
                           <div className="text-sm text-green-700 mt-1">Spots Plantados</div>
                         </div>
                       </div>
-                      {plantas.filter(p => !p.cargado).length > 0 && (
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-3xl font-bold text-blue-600">
+                          {numeroLineas}
+                        </div>
+                        <div className="text-sm text-blue-700 mt-1">Líneas</div>
+                      </div>
+                      {spotsParaEstadisticas.filter(p => !p.cargado).length > 0 && (
                         <div className="text-center p-4 bg-gray-100 rounded-lg">
                           <div className="text-3xl font-bold text-gray-600">
-                            {plantas.filter(p => !p.cargado).length}
+                            {spotsParaEstadisticas.filter(p => !p.cargado).length}
                           </div>
                           <div className="text-sm text-gray-700 mt-1">Spots Vacíos</div>
                         </div>
@@ -318,7 +381,7 @@ export const VistaLotesMapa: React.FC = () => {
                           <div className="w-3 h-3 bg-green-500 border border-green-600 opacity-70"></div>
                           <span>Plantados</span>
                         </div>
-                        {plantas.filter(p => !p.cargado).length > 0 && (
+                        {spotsParaEstadisticas.filter(p => !p.cargado).length > 0 && (
                           <div className="flex items-center gap-1">
                             <div className="w-3 h-3 bg-gray-400 border border-gray-500 opacity-40"></div>
                             <span>Vacíos</span>
@@ -414,6 +477,149 @@ export const VistaLotesMapa: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog de Confirmación de Envío a Sioma */}
+      <Dialog open={mostrarConfirmacionEnvio} onOpenChange={setMostrarConfirmacionEnvio}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              </div>
+              <DialogTitle className="text-xl">¿Confirmar envío a Sioma?</DialogTitle>
+            </div>
+            <DialogDescription className="pt-2">
+              Estás a punto de enviar los datos validados a Sioma. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {datosValidadosCsv && (
+            <div className="space-y-3 py-4">
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <h4 className="font-semibold text-sm mb-3">Resumen del envío:</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total de registros:</span>
+                    <span className="font-medium">{datosValidadosCsv.csvRows.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Finca:</span>
+                    <span className="font-medium">
+                      {fincas.find(f => Number(f.id) === datosValidadosCsv.fincaId)?.nombre || datosValidadosCsv.fincaId}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Lotes únicos:</span>
+                    <span className="font-medium">
+                      {new Set(datosValidadosCsv.csvRows.map(r => r.Lote)).size}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Los datos serán procesados y los polígonos se generarán automáticamente en Sioma.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMostrarConfirmacionEnvio(false)}
+              disabled={enviandoASioma}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmarEnvioASioma}
+              disabled={enviandoASioma}
+              className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
+            >
+              {enviandoASioma ? (
+                <>
+                  <Spinner size="sm" className="mr-2" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Confirmar y Enviar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Respuesta de Sioma */}
+      <Dialog open={!!respuestaSioma} onOpenChange={(open) => !open && setRespuestaSioma(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-green-600 flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                <Send className="h-5 w-5 text-green-600" />
+              </div>
+              Envío exitoso a Sioma
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              Los datos se han procesado correctamente en Sioma
+            </DialogDescription>
+          </DialogHeader>
+          
+          {respuestaSioma && (
+            <div className="space-y-3 py-4">
+              <div className="rounded-lg border bg-green-50 p-4">
+                <p className="text-sm font-medium text-green-800 mb-3">
+                  {respuestaSioma.message || 'Datos enviados exitosamente'}
+                </p>
+                
+                {respuestaSioma.data && (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Spots insertados:</span>
+                      <span className="font-medium">{respuestaSioma.data.spots_inserted || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Plantas insertadas:</span>
+                      <span className="font-medium">{respuestaSioma.data.plantas_inserted || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Polígonos generados:</span>
+                      <span className="font-medium">{respuestaSioma.data.polygons_generated || 0}</span>
+                    </div>
+                    {respuestaSioma.data.lotes_updated && respuestaSioma.data.lotes_updated.length > 0 && (
+                      <div>
+                        <span className="text-muted-foreground">Lotes actualizados:</span>
+                        <span className="font-medium ml-2">
+                          {respuestaSioma.data.lotes_updated.join(', ')}
+                        </span>
+                      </div>
+                    )}
+                    {respuestaSioma.data.finca_id && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Finca ID:</span>
+                        <span className="font-medium">{respuestaSioma.data.finca_id}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              onClick={() => setRespuestaSioma(null)}
+              className="bg-[#AA0F16] hover:bg-[#8B0C12] text-white"
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
