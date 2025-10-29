@@ -64,7 +64,7 @@ export default function Home() {
     >
       <motion.div variants={fadeInUp}>
         <h1 className="text-3xl font-bold text-gray-900">
-          Bienvenido, {user?.name}
+          Bienvenido, {user?.firstName || user?.email}
         </h1>
         <p className="text-gray-600 mt-2">
           Aquí está el resumen de tu actividad
