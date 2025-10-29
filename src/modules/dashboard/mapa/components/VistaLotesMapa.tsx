@@ -1,21 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SelectorFincas } from './SelectorFincas';
-import { useObtenerFincas, useObtenerLotesPorFinca, useObtenerPlantasPorLote } from '../hooks/useFincasLotes';
+import { useObtenerFincas, useObtenerLotesPorFinca, useObtenerPlantasPorLote, useObtenerLineasPorLote } from '../hooks/useFincasLotes';
 import { Spinner } from '@/components/ui/spinner';
 import { MapaReal } from './MapaReal';
 import { Lote } from '../types/lotes.types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { mockLotes } from '@/shared/mocks/mockData';
 
 export const VistaLotesMapa: React.FC = () => {
-  const [fincaSeleccionada, setFincaSeleccionada] = useState<number | null>(null);
-  const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null);
+  // Usar URL state para persistir selecciones
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Leer parámetros de la URL o usar null como default
+  const fincaIdFromUrl = searchParams.get('finca');
+  const loteIdFromUrl = searchParams.get('lote');
+  
+  const [fincaSeleccionada, setFincaSeleccionadaState] = useState<number | null>(
+    fincaIdFromUrl ? parseInt(fincaIdFromUrl) : null
+  );
+  const [loteSeleccionado, setLoteSeleccionadoState] = useState<string | null>(loteIdFromUrl);
 
   // Hooks para obtener datos
   const { data: fincas = [], isLoading: isLoadingFincas } = useObtenerFincas();
   const { data: lotes = [], isLoading: isLoadingLotes } = useObtenerLotesPorFinca(fincaSeleccionada);
-  const { data: plantas = [], isLoading: isLoadingPlantas } = useObtenerPlantasPorLote(loteSeleccionado);
+  
+  // Obtener el id_remoto del lote seleccionado para buscar plantas y líneas
+  const loteRemotoId = useMemo(() => {
+    if (!loteSeleccionado) return null;
+    const loteData = mockLotes.find(l => l.id_local === loteSeleccionado);
+    return loteData ? loteData.id_remoto.toString() : null;
+  }, [loteSeleccionado]);
+  
+  const { data: plantas = [], isLoading: isLoadingPlantas } = useObtenerPlantasPorLote(loteRemotoId);
+  const { data: lineas = [] } = useObtenerLineasPorLote(loteRemotoId);
+  
+  console.log('Debug loteRemotoId:', { loteSeleccionado, loteRemotoId, plantasLength: plantas.length, lineasLength: lineas.length });
 
   // Debug logs
   console.log('Debug VistaLotesMapa:', {
@@ -25,22 +47,54 @@ export const VistaLotesMapa: React.FC = () => {
     lotesLength: lotes.length
   });
 
-  // Resetear lote cuando cambia la finca
+  // Sincronizar estado local con URL cuando cambian los parámetros de URL
+  useEffect(() => {
+    const fincaFromUrl = searchParams.get('finca');
+    const loteFromUrl = searchParams.get('lote');
+    
+    if (fincaFromUrl) {
+      setFincaSeleccionadaState(parseInt(fincaFromUrl));
+    }
+    if (loteFromUrl) {
+      setLoteSeleccionadoState(loteFromUrl);
+    }
+  }, [searchParams]);
+
+  // Función para actualizar finca (actualiza URL)
   const handleFincaChange = (fincaId: number | null) => {
-    setFincaSeleccionada(fincaId);
-    setLoteSeleccionado(null); // Resetear lote seleccionado
+    setFincaSeleccionadaState(fincaId);
+    
+    // Actualizar URL
+    const newParams = new URLSearchParams(searchParams);
+    if (fincaId) {
+      newParams.set('finca', fincaId.toString());
+      newParams.delete('lote'); // Resetear lote al cambiar finca
+    } else {
+      newParams.delete('finca');
+      newParams.delete('lote');
+    }
+    setSearchParams(newParams);
+    
+    // Resetear lote seleccionado
+    setLoteSeleccionadoState(null);
   };
 
   // Obtener el lote seleccionado completo
   const loteActual = lotes.find(lote => lote.id === loteSeleccionado);
 
-  // Función para manejar clicks en lotes del mapa
+  // Función para manejar clicks en lotes del mapa (actualiza URL)
   const handleLoteClick = (lote: Lote | null) => {
-    if (lote) {
-      setLoteSeleccionado(lote.id);
+    const nuevoLoteId = lote ? lote.id : null;
+    setLoteSeleccionadoState(nuevoLoteId);
+    
+    // Actualizar URL
+    const newParams = new URLSearchParams(searchParams);
+    if (nuevoLoteId) {
+      newParams.set('lote', nuevoLoteId);
     } else {
-      setLoteSeleccionado(null);
+      newParams.delete('lote');
     }
+    setSearchParams(newParams);
   };
 
   return (
@@ -128,8 +182,9 @@ export const VistaLotesMapa: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   {isLoadingPlantas ? (
-                    <div className="flex items-center justify-center py-8">
+                    <div className="flex flex-col items-center justify-center py-8">
                       <Spinner size="md" />
+                      <p className="text-xs text-gray-500 mt-2">Cargando datos...</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -145,21 +200,25 @@ export const VistaLotesMapa: React.FC = () => {
                           <div className="text-sm text-green-700 mt-1">Spots Plantados</div>
                         </div>
                       </div>
-                      <div className="text-center p-4 bg-gray-100 rounded-lg">
-                        <div className="text-3xl font-bold text-gray-600">
-                          {plantas.filter(p => !p.cargado).length}
+                      {plantas.filter(p => !p.cargado).length > 0 && (
+                        <div className="text-center p-4 bg-gray-100 rounded-lg">
+                          <div className="text-3xl font-bold text-gray-600">
+                            {plantas.filter(p => !p.cargado).length}
+                          </div>
+                          <div className="text-sm text-gray-700 mt-1">Spots Vacíos</div>
                         </div>
-                        <div className="text-sm text-gray-700 mt-1">Spots Vacíos</div>
-                      </div>
+                      )}
                       <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                         <div className="flex items-center gap-1">
                           <div className="w-3 h-3 bg-green-500 border border-green-600 opacity-70"></div>
                           <span>Plantados</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-gray-400 border border-gray-500 opacity-40"></div>
-                          <span>Vacíos</span>
-                        </div>
+                        {plantas.filter(p => !p.cargado).length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-gray-400 border border-gray-500 opacity-40"></div>
+                            <span>Vacíos</span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-1">
                           <div className="w-6 h-0.5 bg-blue-500"></div>
                           <span>Líneas</span>
@@ -171,14 +230,15 @@ export const VistaLotesMapa: React.FC = () => {
               </Card>
             </div>
           )}
-            <CardContent className="p-0 h-[600px]">
+            <CardContent className="p-0 h-[600px] relative">
               {(() => {
                 console.log('Renderizando mapa:', { isLoadingLotes, lotesLength: lotes.length });
                 
                 if (isLoadingLotes) {
                   return (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center justify-center h-full">
                       <Spinner size="lg" />
+                      <p className="text-sm text-gray-500 mt-4">Cargando lotes de la finca...</p>
                     </div>
                   );
                 }
@@ -198,14 +258,24 @@ export const VistaLotesMapa: React.FC = () => {
                 
                 console.log('Renderizando MapaReal con lotes:', lotes);
                 return (
-                  <MapaReal
-                    lotes={lotes}
-                    height="800px"
-                    onLoteClick={handleLoteClick}
-                    mostrarLeyenda={true}
-                    plantasDelLote={plantas}
-                    loteSeleccionado={loteActual || null}
-                  />
+                  <>
+                    <MapaReal
+                      lotes={lotes}
+                      height="800px"
+                      onLoteClick={handleLoteClick}
+                      mostrarLeyenda={true}
+                      plantasDelLote={plantas}
+                      loteSeleccionado={loteActual || null}
+                      lineas={lineas}
+                    />
+                    {/* Overlay loader para cuando se cargan spots */}
+                    {isLoadingPlantas && loteSeleccionado && (
+                      <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-10">
+                        <Spinner size="lg" />
+                        <p className="text-sm text-gray-600 mt-4">Cargando spots del lote...</p>
+                      </div>
+                    )}
+                  </>
                 );
               })()}
             </CardContent>
