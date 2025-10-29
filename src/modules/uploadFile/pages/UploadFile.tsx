@@ -32,6 +32,7 @@ export default function UploadFile({ fincaId = null, onValidationSuccess, onClea
     handleValidationComplete,
     clearValidation,
     handleDownloadCsv,
+    validationData,
   } = useUploadFilePage();
 
   if (isLoading) {
@@ -68,7 +69,10 @@ export default function UploadFile({ fincaId = null, onValidationSuccess, onClea
             </DialogHeader>
             
             <div className="space-y-4">
-              <ValidationSummary summary={validationSummary} onClose={clearValidation} />
+              <ValidationSummary 
+                summary={validationSummary} 
+                onClose={clearValidation}
+              />
               
               {previewData && (
                 <div className="mt-4">

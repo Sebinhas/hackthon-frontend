@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Home, Users, Upload, ChevronDown, User as UserIcon, Building, MapPin, Layers } from 'lucide-react';
+import { LogOut, Menu, X, Home, ChevronDown, User as UserIcon, Building, MapPin, Layers } from 'lucide-react';
 import { useAuthStore } from '@/core/store/authStore';
 import { Button } from '@/components/ui/button';
 import {
@@ -69,11 +69,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const menuItems = [
     { icon: Home, label: 'Inicio', path: '/dashboard/home' },
-    { icon: Users, label: 'Usuarios', path: '/dashboard/usuarios' },
     { icon: Building, label: 'Fincas', path: '/dashboard/fincas' },
     { icon: Layers, label: 'Lotes', path: '/dashboard/lotes' },
-    { icon: MapPin, label: 'Mapa', path: '/dashboard/mapa' },
-    { icon: Upload, label: 'Subir CSV', path: '/dashboard/upload-file' },
+    { icon: MapPin, label: 'Geodatos', path: '/dashboard/mapa' },
   ];
 
   const isActiveRoute = (path: string) => {
@@ -99,7 +97,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               to="/dashboard" 
               className="flex items-center space-x-2 transition-opacity hover:opacity-80"
             >
+
               <img src={logo} alt="Logo" className="w-10 h-10" />
+              <span className="text-xl font-bold text-[#AA0F16]">AgroSyner</span>
             </Link>
           </div>
 

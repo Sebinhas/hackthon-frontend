@@ -40,16 +40,16 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
             transition={{ delay: 0.3, duration: 0.6 }}
           >
             <h1 className="text-4xl font-bold mb-4">
-              {isLoginPage ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}
+              {isLoginPage ? 'Agricultura de Precisión' : 'Comienza tu gestión agrícola'}
             </h1>
             <p className="text-lg opacity-95 mb-8">
               {isLoginPage
-                ? 'Accede a tu cuenta para continuar con tu trabajo'
-                : 'Únete a nosotros y comienza tu viaje hoy'}
+                ? 'Valida datos de cultivos, gestiona lotes y optimiza tus fincas con tecnología de precisión'
+                : 'Valida información de tus cultivos, gestiona coordenadas y realiza agricultura de precisión desde el primer día'}
             </p>
             <div className="flex items-center gap-2 text-sm opacity-90">
               <div className="h-1 w-12 bg-white rounded-full" />
-              <span>Seguro y confiable</span>
+              <span>Tecnología de precisión</span>
             </div>
           </motion.div>
         </div>
