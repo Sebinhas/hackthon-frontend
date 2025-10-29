@@ -90,8 +90,7 @@ export default function Fincas() {
       <DataTable
         data={fincas}
         columns={columns}
-        filterPlaceholder="Buscar finca por nombre..."
-        filterKey="nombre"
+        filterPlaceholder="Buscar en todas las columnas..."
         pageSizeOptions={[5, 10, 15, 20]}
         defaultPageSize={10}
       />

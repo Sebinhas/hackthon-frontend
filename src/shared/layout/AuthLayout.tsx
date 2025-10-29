@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import fondoAuth from '../../assets/auth/fondo_auth.webp';
-
+import logo from '@/assets/landing/Logo.png';
 interface AuthLayoutProps {
   children: ReactNode;
   isLogin?: boolean;
@@ -66,10 +66,9 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
           {/* Logo y navegación */}
           <div className="mb-10">
             <Link to="/" className="inline-flex items-center gap-2 group">
-              <div className="h-10 w-10 rounded-lg bg-[#AA0F16] flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-xl">P</span>
+              <div className="h-10 w-10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                <img src={logo} alt="Logo" className="w-10 h-10" />
               </div>
-              <span className="text-xl font-bold text-neutral-900">Plant Template</span>
             </Link>
           </div>
 
@@ -81,7 +80,7 @@ export default function AuthLayout({ children, isLogin = false }: AuthLayoutProp
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-sm text-neutral-600">
-              © 2024 Plant Template. Todos los derechos reservados.
+              © 2025 Juan's Devs. Todos los derechos reservados.
             </p>
           </div>
         </motion.div>
